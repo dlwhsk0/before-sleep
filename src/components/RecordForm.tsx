@@ -31,7 +31,7 @@ export function RecordForm({
     if (existing) {
       setSleepStart(existing.sleepStart)
       setSleepEnd(existing.sleepEnd)
-      setWeight(String(existing.weightKg))
+      setWeight(existing.weightKg.toFixed(1))
     } else {
       setSleepStart(DEFAULT_START)
       setSleepEnd(DEFAULT_END)
@@ -49,6 +49,21 @@ export function RecordForm({
   const setDuration = (hours: number, minutes: number) => {
     const total = hours * 60 + minutes
     setSleepEnd(addMinutes(sleepStart, total))
+  }
+
+  // 몸무게를 0.1kg 단위로 증감 (빈 값은 0으로 간주, 음수 방지). 항상 소수점 첫째자리.
+  const stepWeight = (delta: number) => {
+    const base = weight === '' || Number.isNaN(Number(weight)) ? 0 : Number(weight)
+    const next = Math.max(0, base + delta)
+    setWeight(next.toFixed(1))
+  }
+
+  // 입력 칸을 벗어날 때 소수점 첫째자리로 정규화 (타이핑 중에는 건드리지 않음)
+  const normalizeWeight = () => {
+    if (weight === '') return
+    const n = Number(weight)
+    if (Number.isNaN(n)) return
+    setWeight(Math.max(0, n).toFixed(1))
   }
 
   const weightNum = Number(weight)
@@ -96,7 +111,7 @@ export function RecordForm({
         />
 
         {/* 소요 시간 직접 수정 (취침 고정, 기상 이동) */}
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center justify-center gap-2 text-sm">
           <span className="text-neutral-500">소요</span>
           <input
             type="number"
@@ -120,20 +135,39 @@ export function RecordForm({
         </div>
       </div>
 
-      {/* 몸무게 */}
-      <label className="flex flex-col gap-1">
+      {/* 몸무게 (중앙 정렬 + 양옆 −/+ 스테퍼) */}
+      <div className="flex flex-col gap-1">
         <span className="text-sm text-neutral-500">몸무게 (kg)</span>
-        <input
-          type="number"
-          inputMode="decimal"
-          step="0.1"
-          min="0"
-          value={weight}
-          onChange={(e) => setWeight(e.target.value)}
-          placeholder="예: 68.2"
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-lg outline-none focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
-        />
-      </label>
+        <div className="flex items-center justify-center gap-3">
+          <button
+            type="button"
+            aria-label="0.1kg 감소"
+            onClick={() => stepWeight(-0.1)}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-2xl leading-none text-neutral-700 active:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:active:bg-neutral-800"
+          >
+            −
+          </button>
+          <input
+            type="number"
+            inputMode="decimal"
+            step="0.1"
+            min="0"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            onBlur={normalizeWeight}
+            placeholder="예: 68.2"
+            className="w-28 rounded-lg border border-neutral-300 px-3 py-2 text-center text-lg outline-none focus:border-neutral-900 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
+          />
+          <button
+            type="button"
+            aria-label="0.1kg 증가"
+            onClick={() => stepWeight(0.1)}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-2xl leading-none text-neutral-700 active:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:active:bg-neutral-800"
+          >
+            +
+          </button>
+        </div>
+      </div>
 
       <button
         type="submit"

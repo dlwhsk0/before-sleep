@@ -3,7 +3,7 @@ import { todayKey } from '../lib/date'
 import { formatClock, formatHM } from '../lib/time'
 import { DeltaBadge } from './DeltaBadge'
 
-const kg = (n: number) => `${n}kg`
+const kg = (n: number) => `${n.toFixed(1)}kg`
 
 /**
  * 기록 카드 리스트. 최신 날짜가 위로 오도록 역순 정렬해 보여준다.
@@ -71,7 +71,7 @@ export function RecordList({
               <span className="text-neutral-500">몸무게</span>
               <span className="flex items-baseline gap-2">
                 <span className="text-base font-medium text-neutral-900 dark:text-neutral-50">
-                  {row.weightKg}kg
+                  {row.weightKg.toFixed(1)}kg
                 </span>
                 <DeltaBadge value={row.weightDelta} format={kg} />
               </span>

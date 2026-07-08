@@ -2,20 +2,19 @@ import { useRef } from 'react'
 import { durationMinutes, formatClock, formatHM } from '../lib/time'
 
 /**
- * 동심 이중 링 원형 다이얼로 수면 시각을 정한다.
- * - 바깥 링 = 시(0~23, 원 한 바퀴 = 24시간 → 24시간 전부 선택 가능)
- * - 안쪽 링 = 분(5분 단위)
- * - 취침(indigo)/기상(amber) 각각의 시·분 핸들 = 총 4개를 드래그/방향키로 조정.
+ * 단일 24시간 원형 다이얼로 수면 시각을 정한다.
+ * - 원 한 바퀴 = 24시간 (12시 방향=0시, 시계방향) → 24시간 전부 선택 가능.
+ * - 취침(indigo)/기상(amber) 두 핸들을 드래그/방향키로 조정. 5분 단위 스냅.
+ * - 두 핸들 사이를 호로 이어 수면 구간을 표시.
  *
  * 값은 상위(폼)가 소유하는 controlled 컴포넌트. start/end는 자정 기준 분(0–1439).
  */
 
 const SIZE = 260
 const C = SIZE / 2
-const R_HOUR = 108
-const R_MIN = 66
-const HOUR_HANDLE = 15
-const MIN_HANDLE = 12
+const R = 100
+const HANDLE = 15
+const SNAP = 5 // 분
 
 const START_COLOR = '#6366f1' // indigo (취침)
 const END_COLOR = '#f59e0b' // amber (기상)
@@ -28,9 +27,7 @@ function polar(r: number, frac: number) {
 
 type Handle = {
   key: string
-  ring: 'hour' | 'min'
-  value: number
-  frac: number // 원 위 렌더 위치(0~1). 시 핸들은 분까지 반영해 호 끝과 정확히 맞물림.
+  value: number // 자정 기준 분
   color: string
   label: string
   apply: (value: number) => void
@@ -47,90 +44,57 @@ export function SleepClock({
 }) {
   const svgRef = useRef<SVGSVGElement>(null)
 
-  const startHour = Math.floor(start / 60)
-  const startMin = start % 60
-  const endHour = Math.floor(end / 60)
-  const endMin = end % 60
-
-  // 포인터 위치 → 원 중심 기준 각도 비율(0~1)
-  const fracFromPointer = (clientX: number, clientY: number): number => {
+  // 포인터 위치 → 자정 기준 분 (5분 스냅)
+  const timeFromPointer = (clientX: number, clientY: number): number => {
     const el = svgRef.current
-    if (!el) return 0
+    if (!el) return start
     const rect = el.getBoundingClientRect()
     const dx = clientX - (rect.left + rect.width / 2)
     const dy = clientY - (rect.top + rect.height / 2)
     let deg = Math.atan2(dy, dx) * (180 / Math.PI) + 90
     deg = ((deg % 360) + 360) % 360
-    return deg / 360
+    return (Math.round((deg / 360) * (1440 / SNAP)) * SNAP) % 1440
   }
-
-  const hourFromFrac = (f: number) => Math.round(f * 24) % 24
-  const minFromFrac = (f: number) => (Math.round(f * 12) * 5) % 60
 
   const handles: Handle[] = [
     {
-      key: 'startHour',
-      ring: 'hour',
-      value: startHour,
-      frac: start / 1440, // 분까지 반영한 실제 취침 시각 위치
+      key: 'start',
+      value: start,
       color: START_COLOR,
-      label: '취침 시',
-      apply: (v) => onChange(v * 60 + startMin, end),
+      label: '취침 시각',
+      apply: (v) => onChange(v, end),
     },
     {
-      key: 'endHour',
-      ring: 'hour',
-      value: endHour,
-      frac: end / 1440, // 분까지 반영한 실제 기상 시각 위치
+      key: 'end',
+      value: end,
       color: END_COLOR,
-      label: '기상 시',
-      apply: (v) => onChange(start, v * 60 + endMin),
-    },
-    {
-      key: 'startMin',
-      ring: 'min',
-      value: startMin,
-      frac: startMin / 60,
-      color: START_COLOR,
-      label: '취침 분',
-      apply: (v) => onChange(startHour * 60 + v, end),
-    },
-    {
-      key: 'endMin',
-      ring: 'min',
-      value: endMin,
-      frac: endMin / 60,
-      color: END_COLOR,
-      label: '기상 분',
-      apply: (v) => onChange(start, endHour * 60 + v),
+      label: '기상 시각',
+      apply: (v) => onChange(start, v),
     },
   ]
 
   const onHandleMove = (h: Handle) => (e: React.PointerEvent) => {
     if (e.buttons === 0) return // 드래그 중이 아니면 무시
-    const f = fracFromPointer(e.clientX, e.clientY)
-    h.apply(h.ring === 'hour' ? hourFromFrac(f) : minFromFrac(f))
+    h.apply(timeFromPointer(e.clientX, e.clientY))
   }
 
   const onHandleKey = (h: Handle) => (e: React.KeyboardEvent) => {
     let d = 0
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') d = -1
-    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') d = 1
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') d = -SNAP
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') d = SNAP
     if (d === 0) return
     e.preventDefault()
-    if (h.ring === 'hour') h.apply((h.value + d + 24) % 24)
-    else h.apply((h.value + d * 5 + 60) % 60)
+    h.apply((h.value + d + 1440) % 1440)
   }
 
   const dur = durationMinutes(start, end)
   const hourTicks = [0, 3, 6, 9, 12, 15, 18, 21]
-  const minTicks = [0, 15, 30, 45]
 
-  // 취침 → 기상 수면 구간 호 (바깥 시 링, 실제 시각 기준, 시계방향)
-  const arcStart = polar(R_HOUR, start / 1440)
-  const arcEnd = polar(R_HOUR, end / 1440)
+  // 취침 → 기상 수면 구간 호 (실제 시각 기준, 시계방향)
+  const arcStart = polar(R, start / 1440)
+  const arcEnd = polar(R, end / 1440)
   const largeArc = dur / 1440 > 0.5 ? 1 : 0
-  const arcPath = `M ${arcStart.x} ${arcStart.y} A ${R_HOUR} ${R_HOUR} 0 ${largeArc} 1 ${arcEnd.x} ${arcEnd.y}`
+  const arcPath = `M ${arcStart.x} ${arcStart.y} A ${R} ${R} 0 ${largeArc} 1 ${arcEnd.x} ${arcEnd.y}`
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -143,18 +107,10 @@ export function SleepClock({
         <circle
           cx={C}
           cy={C}
-          r={R_HOUR}
+          r={R}
           fill="none"
           strokeWidth={2}
           className="stroke-neutral-200 dark:stroke-neutral-700"
-        />
-        <circle
-          cx={C}
-          cy={C}
-          r={R_MIN}
-          fill="none"
-          strokeWidth={2}
-          className="stroke-neutral-100 dark:stroke-neutral-800"
         />
 
         {/* 취침 → 기상 수면 구간 호 (취침색 → 기상색 그라데이션) */}
@@ -177,42 +133,25 @@ export function SleepClock({
               d={arcPath}
               fill="none"
               stroke="url(#sleepArc)"
-              strokeWidth={7}
+              strokeWidth={8}
               strokeLinecap="round"
             />
           </>
         )}
 
-        {/* 시 눈금 (바깥) */}
+        {/* 시 눈금 */}
         {hourTicks.map((h) => {
-          const p = polar(R_HOUR, h / 24)
+          const p = polar(R - 20, h / 24)
           return (
             <text
-              key={`h${h}`}
+              key={h}
               x={p.x}
               y={p.y}
               dy="0.32em"
               textAnchor="middle"
-              className="fill-neutral-400 text-[9px]"
+              className="fill-neutral-400 text-[10px]"
             >
               {h}
-            </text>
-          )
-        })}
-
-        {/* 분 눈금 (안쪽) */}
-        {minTicks.map((m) => {
-          const p = polar(R_MIN, m / 60)
-          return (
-            <text
-              key={`m${m}`}
-              x={p.x}
-              y={p.y}
-              dy="0.32em"
-              textAnchor="middle"
-              className="fill-neutral-300 text-[8px] dark:fill-neutral-600"
-            >
-              {m}
             </text>
           )
         })}
@@ -222,37 +161,35 @@ export function SleepClock({
           x={C}
           y={C - 4}
           textAnchor="middle"
-          className="fill-neutral-900 text-[15px] font-semibold dark:fill-neutral-100"
+          className="fill-neutral-900 text-[16px] font-semibold dark:fill-neutral-100"
         >
           {formatHM(dur)}
         </text>
         <text
           x={C}
-          y={C + 14}
+          y={C + 15}
           textAnchor="middle"
-          className="fill-neutral-400 text-[10px]"
+          className="fill-neutral-400 text-[11px]"
         >
           {formatClock(start)} → {formatClock(end)}
         </text>
 
-        {/* 핸들 (시 2 + 분 2) */}
+        {/* 핸들 (취침 / 기상) */}
         {handles.map((h) => {
-          const r = h.ring === 'hour' ? R_HOUR : R_MIN
-          const p = polar(r, h.frac)
-          const radius = h.ring === 'hour' ? HOUR_HANDLE : MIN_HANDLE
+          const p = polar(R, h.value / 1440)
           return (
             <circle
               key={h.key}
               cx={p.x}
               cy={p.y}
-              r={radius}
+              r={HANDLE}
               fill={h.color}
               stroke="white"
               strokeWidth={2}
               role="slider"
               tabIndex={0}
               aria-label={h.label}
-              aria-valuenow={h.value}
+              aria-valuetext={formatClock(h.value)}
               className="cursor-grab touch-none outline-none focus:stroke-neutral-900 active:cursor-grabbing dark:focus:stroke-neutral-100"
               onPointerDown={(e) => e.currentTarget.setPointerCapture(e.pointerId)}
               onPointerMove={onHandleMove(h)}
