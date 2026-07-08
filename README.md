@@ -6,6 +6,8 @@
 
 **수면과 몸무게, 딱 두 가지만 매일 기록하는 미니멀 건강 관리 앱**
 
+[▶ 라이브 데모](https://health-tracker-tau-coral.vercel.app)
+
 </div>
 
 ## 소개
