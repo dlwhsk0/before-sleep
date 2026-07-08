@@ -35,7 +35,8 @@ export function RecordForm({
     } else {
       setSleepStart(DEFAULT_START)
       setSleepEnd(DEFAULT_END)
-      setWeight('')
+      // 몸무게는 초기화하지 않고 현재 입력값 유지 (날짜 이동 시 재입력 방지).
+      // 매일 몸무게는 크게 안 바뀌므로 직전 값을 시작점으로 두는 게 편하다.
     }
     // existing은 date/records에서 파생되므로 그 둘만 의존성으로 둔다.
     // eslint-disable-next-line react-hooks/exhaustive-deps

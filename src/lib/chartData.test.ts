@@ -44,20 +44,51 @@ describe('toChartRows', () => {
     expect(toChartRows([])).toEqual([])
   })
 
-  it('기록 1개 → 첫날 대비는 null', () => {
-    const [row] = toChartRows([stat('2026-07-01', 480, 68, null)])
-    expect(row.sleepHours).toBe(8)
-    expect(row.weightFromStart).toBeNull()
-    expect(row.label).toBe('07/01')
+  it('기록 1개여도 x축은 7일(일주일)로 채운다', () => {
+    const rows = toChartRows([stat('2026-07-08', 480, 68, null)])
+    expect(rows).toHaveLength(7)
+    expect(rows[0].date).toBe('2026-07-02') // 07-08 기준 6일 전부터
+    const last = rows[rows.length - 1]
+    expect(last.date).toBe('2026-07-08')
+    expect(last.weightKg).toBe(68)
+    expect(last.sleepHours).toBe(8)
+    expect(last.weightFromStart).toBeNull()
+    // 기록 없는 날은 null
+    expect(rows[0].weightKg).toBeNull()
+    expect(rows[0].sleepHours).toBeNull()
   })
 
-  it('여러 기록 → 입력 순서(오름차순) 유지, 값 통과', () => {
+  it('기록이 적어도 최소 7일 폭을 보장한다', () => {
+    const rows = toChartRows([
+      stat('2026-07-08', 480, 68, null),
+      stat('2026-07-09', 470, 67.8, -0.2),
+      stat('2026-07-10', 465, 67.6, -0.4),
+    ])
+    expect(rows).toHaveLength(7)
+    expect(rows[0].date).toBe('2026-07-04')
+    expect(rows[rows.length - 1].date).toBe('2026-07-10')
+  })
+
+  it('빠진 날은 null로 채운다', () => {
     const rows = toChartRows([
       stat('2026-07-01', 480, 68.0, null),
-      stat('2026-07-02', 465, 67.6, -0.4),
+      stat('2026-07-03', 465, 67.6, -0.4), // 07-02 빠짐
     ])
-    expect(rows.map((r) => r.date)).toEqual(['2026-07-01', '2026-07-02'])
-    expect(rows[1].sleepHours).toBe(7.75)
-    expect(rows[1].weightFromStart).toBe(-0.4)
+    const gap = rows.find((r) => r.date === '2026-07-02')
+    expect(gap?.weightKg).toBeNull()
+    const has = rows.find((r) => r.date === '2026-07-03')
+    expect(has?.weightKg).toBe(67.6)
+    expect(has?.sleepHours).toBe(7.75)
+    expect(has?.weightFromStart).toBe(-0.4)
+  })
+
+  it('7일 넘게 연속이면 전체 일수만큼(오름차순)', () => {
+    const stats = Array.from({ length: 9 }, (_, i) =>
+      stat(`2026-07-0${i + 1}`, 480, 68, i === 0 ? null : 0),
+    ) // 2026-07-01 .. 2026-07-09
+    const rows = toChartRows(stats)
+    expect(rows).toHaveLength(9)
+    expect(rows.every((r) => r.weightKg !== null)).toBe(true)
+    expect(rows.map((r) => r.date)).toEqual(stats.map((s) => s.date))
   })
 })

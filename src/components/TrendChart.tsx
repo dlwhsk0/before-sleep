@@ -9,9 +9,7 @@ import {
   YAxis,
 } from 'recharts'
 import type { ChartRow } from '../lib/chartData'
-
-// 기본으로 보이는 일수(최근 일주일). 이보다 많으면 드래그(Brush)로 이전 기록 탐색.
-const WINDOW_DAYS = 7
+import { WINDOW_DAYS } from '../lib/chartData'
 
 /**
  * 한 시리즈의 추이를 보여주는 반응형 라인 차트.
@@ -65,7 +63,7 @@ export function TrendChart({
               stroke={color}
               strokeWidth={2}
               dot={{ r: 3 }}
-              connectNulls={false}
+              connectNulls
               isAnimationActive={false}
             />
             {showBrush && (
