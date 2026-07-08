@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useRecords } from './hooks/useRecords'
 import { computeStats } from './lib/stats'
 import { RecordForm } from './components/RecordForm'
 import { RecordList } from './components/RecordList'
-import { StatsSection } from './components/StatsSection'
+
+// 통계 화면은 Recharts를 포함해 무거우므로, 통계 탭을 열 때만 지연 로딩한다.
+const StatsSection = lazy(() =>
+  import('./components/StatsSection').then((m) => ({ default: m.StatsSection })),
+)
 
 type Tab = 'record' | 'stats'
 
@@ -71,7 +75,15 @@ function App() {
           {loading ? (
             <p className="py-8 text-center text-sm text-neutral-400">불러오는 중…</p>
           ) : (
-            <StatsSection stats={stats} />
+            <Suspense
+              fallback={
+                <p className="py-8 text-center text-sm text-neutral-400">
+                  차트 불러오는 중…
+                </p>
+              }
+            >
+              <StatsSection stats={stats} />
+            </Suspense>
           )}
         </section>
       )}

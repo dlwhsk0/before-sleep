@@ -1,4 +1,5 @@
 import {
+  Brush,
   CartesianGrid,
   Line,
   LineChart,
@@ -8,6 +9,9 @@ import {
   YAxis,
 } from 'recharts'
 import type { ChartRow } from '../lib/chartData'
+
+// 기본으로 보이는 일수(최근 일주일). 이보다 많으면 드래그(Brush)로 이전 기록 탐색.
+const WINDOW_DAYS = 7
 
 /**
  * 한 시리즈의 추이를 보여주는 반응형 라인 차트.
@@ -27,10 +31,15 @@ export function TrendChart({
   color: string
   unit: string
 }) {
+  // 기본 창: 최근 WINDOW_DAYS개. 그보다 많을 때만 드래그용 Brush를 띄운다.
+  const showBrush = data.length > WINDOW_DAYS
+  const startIndex = showBrush ? data.length - WINDOW_DAYS : 0
+  const endIndex = data.length - 1
+
   return (
     <div className="flex flex-col gap-1">
       <h3 className="text-sm font-medium text-neutral-500">{title}</h3>
-      <div className="h-44 w-full">
+      <div className={`${showBrush ? 'h-52' : 'h-44'} w-full`}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -16 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
@@ -59,6 +68,16 @@ export function TrendChart({
               connectNulls={false}
               isAnimationActive={false}
             />
+            {showBrush && (
+              <Brush
+                dataKey="label"
+                height={18}
+                travellerWidth={8}
+                stroke="var(--chart-axis)"
+                startIndex={startIndex}
+                endIndex={endIndex}
+              />
+            )}
           </LineChart>
         </ResponsiveContainer>
       </div>
