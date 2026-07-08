@@ -53,12 +53,13 @@ type DailyRecord = {
 
 - `npm run dev` — 개발 서버
 - `npm run build` — 타입체크(`tsc -b`) + 프로덕션 빌드
+- `npm run test` — vitest 단위 테스트 (순수 로직 검증)
 - `npm run lint` — oxlint
 
 ## 빌드 단계 (진행 상황)
 
 - [x] 단계 0 — 스캐폴딩 + 이 CLAUDE.md
-- [ ] 단계 1 — 데이터 계층(IndexedDB) + 통계 로직
+- [x] 단계 1 — 데이터 계층(IndexedDB) + 통계 로직
 - [ ] 단계 2 — 기록 입력 UI + 목록
 - [ ] 단계 3 — 통계/차트 화면
 - [ ] 단계 4 — PWA + 마무리
