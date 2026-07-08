@@ -25,3 +25,6 @@ dist-ssr
 
 # vite-plugin-pwa dev output
 dev-dist
+
+# Claude Code 개인 설정 (커밋 안 함)
+.claude/settings.local.json

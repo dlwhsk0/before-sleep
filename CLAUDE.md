@@ -72,7 +72,11 @@ type DailyRecord = {
 - [x] 단계 1 — 데이터 계층(IndexedDB) + 통계 로직
 - [x] 단계 2 — 기록 입력 UI + 목록
 - [x] 단계 3 — 통계/차트 화면
-- [ ] 단계 4 — PWA + 마무리
+- [x] 단계 4 — PWA + 마무리
+
+## 스킬
+
+- `/ship` (`.claude/skills/ship/`) — 변경을 검증(test+build)하고 관례대로 커밋·푸시하는 반복 절차.
 
 ---
 
