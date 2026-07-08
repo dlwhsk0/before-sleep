@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { DailyRecord } from '../types'
 import { todayKey } from '../lib/date'
 import { addMinutes, durationMinutes } from '../lib/time'
-import { SleepTimeSlider } from './SleepTimeSlider'
+import { SleepClock } from './SleepClock'
 
 const DEFAULT_START = 23 * 60 // 23:00
 const DEFAULT_END = 7 * 60 // 07:00
@@ -86,7 +86,7 @@ export function RecordForm({
       {/* 수면: 드래그 슬라이더 */}
       <div className="flex flex-col gap-3">
         <span className="text-sm text-neutral-500">수면</span>
-        <SleepTimeSlider
+        <SleepClock
           start={sleepStart}
           end={sleepEnd}
           onChange={(s, en) => {
