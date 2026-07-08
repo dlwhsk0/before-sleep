@@ -21,7 +21,8 @@
 - **저장소: IndexedDB** (`idb` 래퍼) — 백엔드 없음, 데이터는 브라우저 로컬에만 저장
 - **차트: Recharts**
 - **스타일: Tailwind CSS v4** (`@tailwindcss/vite` 플러그인, `@import 'tailwindcss'`)
-- **PWA** (단계 4에서 추가 예정)
+- **PWA** (`vite-plugin-pwa`): 매니페스트 + 서비스워커(오프라인 프리캐시), "홈 화면에 추가" 지원.
+  앱 아이콘 원본은 `public/icon.svg`, PNG(192/512/apple-touch)는 macOS `qlmanage`+`sips`로 생성.
 
 여러 기기 동기화가 필요해지기 전까지 백엔드는 도입하지 않는다.
 
