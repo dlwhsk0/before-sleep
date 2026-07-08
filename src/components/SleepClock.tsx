@@ -30,6 +30,7 @@ type Handle = {
   key: string
   ring: 'hour' | 'min'
   value: number
+  frac: number // 원 위 렌더 위치(0~1). 시 핸들은 분까지 반영해 호 끝과 정확히 맞물림.
   color: string
   label: string
   apply: (value: number) => void
@@ -71,6 +72,7 @@ export function SleepClock({
       key: 'startHour',
       ring: 'hour',
       value: startHour,
+      frac: start / 1440, // 분까지 반영한 실제 취침 시각 위치
       color: START_COLOR,
       label: '취침 시',
       apply: (v) => onChange(v * 60 + startMin, end),
@@ -79,6 +81,7 @@ export function SleepClock({
       key: 'endHour',
       ring: 'hour',
       value: endHour,
+      frac: end / 1440, // 분까지 반영한 실제 기상 시각 위치
       color: END_COLOR,
       label: '기상 시',
       apply: (v) => onChange(start, v * 60 + endMin),
@@ -87,6 +90,7 @@ export function SleepClock({
       key: 'startMin',
       ring: 'min',
       value: startMin,
+      frac: startMin / 60,
       color: START_COLOR,
       label: '취침 분',
       apply: (v) => onChange(startHour * 60 + v, end),
@@ -95,6 +99,7 @@ export function SleepClock({
       key: 'endMin',
       ring: 'min',
       value: endMin,
+      frac: endMin / 60,
       color: END_COLOR,
       label: '기상 분',
       apply: (v) => onChange(start, endHour * 60 + v),
@@ -121,6 +126,12 @@ export function SleepClock({
   const hourTicks = [0, 3, 6, 9, 12, 15, 18, 21]
   const minTicks = [0, 15, 30, 45]
 
+  // 취침 → 기상 수면 구간 호 (바깥 시 링, 실제 시각 기준, 시계방향)
+  const arcStart = polar(R_HOUR, start / 1440)
+  const arcEnd = polar(R_HOUR, end / 1440)
+  const largeArc = dur / 1440 > 0.5 ? 1 : 0
+  const arcPath = `M ${arcStart.x} ${arcStart.y} A ${R_HOUR} ${R_HOUR} 0 ${largeArc} 1 ${arcEnd.x} ${arcEnd.y}`
+
   return (
     <div className="flex flex-col items-center gap-3">
       <svg
@@ -145,6 +156,32 @@ export function SleepClock({
           strokeWidth={2}
           className="stroke-neutral-100 dark:stroke-neutral-800"
         />
+
+        {/* 취침 → 기상 수면 구간 호 (취침색 → 기상색 그라데이션) */}
+        {dur > 0 && (
+          <>
+            <defs>
+              <linearGradient
+                id="sleepArc"
+                gradientUnits="userSpaceOnUse"
+                x1={arcStart.x}
+                y1={arcStart.y}
+                x2={arcEnd.x}
+                y2={arcEnd.y}
+              >
+                <stop offset="0%" stopColor={START_COLOR} />
+                <stop offset="100%" stopColor={END_COLOR} />
+              </linearGradient>
+            </defs>
+            <path
+              d={arcPath}
+              fill="none"
+              stroke="url(#sleepArc)"
+              strokeWidth={7}
+              strokeLinecap="round"
+            />
+          </>
+        )}
 
         {/* 시 눈금 (바깥) */}
         {hourTicks.map((h) => {
@@ -201,8 +238,7 @@ export function SleepClock({
         {/* 핸들 (시 2 + 분 2) */}
         {handles.map((h) => {
           const r = h.ring === 'hour' ? R_HOUR : R_MIN
-          const frac = h.ring === 'hour' ? h.value / 24 : h.value / 60
-          const p = polar(r, frac)
+          const p = polar(r, h.frac)
           const radius = h.ring === 'hour' ? HOUR_HANDLE : MIN_HANDLE
           return (
             <circle
