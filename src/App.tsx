@@ -2,6 +2,7 @@ import { useRecords } from './hooks/useRecords'
 import { computeStats } from './lib/stats'
 import { RecordForm } from './components/RecordForm'
 import { RecordList } from './components/RecordList'
+import { StatsSection } from './components/StatsSection'
 
 function App() {
   const { records, loading, save, remove } = useRecords()
@@ -18,6 +19,15 @@ function App() {
       </header>
 
       <RecordForm records={records} onSave={save} />
+
+      {!loading && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-50">
+            통계
+          </h2>
+          <StatsSection stats={stats} />
+        </section>
+      )}
 
       <section className="flex flex-col gap-3">
         <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-50">

@@ -2,6 +2,20 @@
 
 :root {
   color-scheme: light dark;
+
+  /* 차트 색 (Recharts에 var()로 전달) */
+  --chart-grid: #e5e5e5;
+  --chart-axis: #a3a3a3;
+  --chart-weight: #6366f1; /* indigo */
+  --chart-sleep: #0ea5e9; /* sky */
+  --chart-cum: #f59e0b; /* amber */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --chart-grid: #333333;
+    --chart-axis: #777777;
+  }
 }
 
 body {
