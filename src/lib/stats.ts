@@ -1,8 +1,9 @@
 import type { DailyRecord, RecordStats } from '../types'
+import { durationMinutes } from './time'
 
 /**
  * 소수 첫째 자리로 반올림한다.
- * 부동소수 오차(예: 7.5 - 7.2 = 0.30000000000000004)를 정리하는 용도.
+ * 부동소수 오차(예: 67.6 - 68.0 = -0.3999999...)를 정리하는 용도.
  */
 export function round1(n: number): number {
   return Math.round(n * 10) / 10
@@ -15,8 +16,9 @@ export function round1(n: number): number {
  * 입력 순서와 무관하도록 내부에서 날짜 오름차순으로 정렬한다.
  *
  * 규칙:
- * - 전일 대비 = "직전에 기록이 있는 날"(달력상 전날이 아니라 배열의 이전 항목) 기준
- * - 첫날 대비 = 몸무게만, 가장 오래된 기록 기준
+ * - 수면 소요 = 취침~기상(자정 넘김 포함), 전일 대비는 "직전 기록일"의 소요와 비교(분)
+ * - 몸무게 전일 대비 = 직전 기록일 기준
+ * - 몸무게 첫날 대비 = 가장 오래된 기록 기준
  * - 비교 대상이 없는 첫 기록은 모든 증감이 null
  */
 export function computeStats(records: DailyRecord[]): RecordStats[] {
@@ -25,9 +27,13 @@ export function computeStats(records: DailyRecord[]): RecordStats[] {
 
   return sorted.map((record, i) => {
     const prev = i > 0 ? sorted[i - 1] : null
+    const sleepMinutes = durationMinutes(record.sleepStart, record.sleepEnd)
     return {
       ...record,
-      sleepDelta: prev ? round1(record.sleepHours - prev.sleepHours) : null,
+      sleepMinutes,
+      sleepDeltaMinutes: prev
+        ? sleepMinutes - durationMinutes(prev.sleepStart, prev.sleepEnd)
+        : null,
       weightDelta: prev ? round1(record.weightKg - prev.weightKg) : null,
       weightDeltaFromStart: prev ? round1(record.weightKg - first.weightKg) : null,
     }

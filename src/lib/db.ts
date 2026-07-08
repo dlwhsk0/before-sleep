@@ -1,5 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 import type { DailyRecord } from '../types'
+import { addMinutes } from './time'
 
 interface HealthDB extends DBSchema {
   records: {
@@ -9,17 +10,51 @@ interface HealthDB extends DBSchema {
 }
 
 const DB_NAME = 'health-tracker'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE = 'records'
+
+// v1 레거시 레코드 형태 (마이그레이션용)
+type LegacyRecord = {
+  date: string
+  sleepHours: number
+  weightKg: number
+}
+
+const DEFAULT_SLEEP_START = 23 * 60 // 23:00, 레거시 데이터에 취침 시각이 없을 때 기본값
 
 let dbPromise: Promise<IDBPDatabase<HealthDB>> | null = null
 
 function getDb(): Promise<IDBPDatabase<HealthDB>> {
   if (!dbPromise) {
     dbPromise = openDB<HealthDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        // date를 keyPath로 쓰므로 하루에 한 개만 저장된다 (같은 날짜 put 시 덮어씀).
-        db.createObjectStore(STORE, { keyPath: 'date' })
+      async upgrade(db, oldVersion, _newVersion, tx) {
+        // v1: 스토어 생성 (date를 keyPath로 → 하루 한 개)
+        if (oldVersion < 1) {
+          db.createObjectStore(STORE, { keyPath: 'date' })
+        }
+
+        // v2: 수면을 sleepHours → sleepStart/sleepEnd 로 마이그레이션.
+        // 취침 시각 정보가 없으므로 기본 취침 23:00을 두고 소요 시간을 보존한다.
+        if (oldVersion >= 1 && oldVersion < 2) {
+          const store = tx.objectStore(STORE)
+          let cursor = await store.openCursor()
+          while (cursor) {
+            const value = cursor.value as unknown as LegacyRecord | DailyRecord
+            if ('sleepHours' in value) {
+              const migrated: DailyRecord = {
+                date: value.date,
+                sleepStart: DEFAULT_SLEEP_START,
+                sleepEnd: addMinutes(
+                  DEFAULT_SLEEP_START,
+                  Math.round(value.sleepHours * 60),
+                ),
+                weightKg: value.weightKg,
+              }
+              await cursor.update(migrated)
+            }
+            cursor = await cursor.continue()
+          }
+        }
       },
     })
   }
@@ -41,7 +76,6 @@ export async function getRecord(date: string): Promise<DailyRecord | undefined> 
 /** 모든 기록을 날짜 오름차순으로 가져온다. */
 export async function getAllRecords(): Promise<DailyRecord[]> {
   const db = await getDb()
-  // getAll은 keyPath(date) 오름차순으로 반환하지만, 명시적으로 정렬해 안전하게 보장한다.
   const all = await db.getAll(STORE)
   return all.sort((a, b) => a.date.localeCompare(b.date))
 }

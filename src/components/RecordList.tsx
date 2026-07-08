@@ -1,10 +1,13 @@
 import type { RecordStats } from '../types'
 import { todayKey } from '../lib/date'
+import { formatClock, formatHM } from '../lib/time'
 import { DeltaBadge } from './DeltaBadge'
+
+const kg = (n: number) => `${n}kg`
 
 /**
  * 기록 카드 리스트. 최신 날짜가 위로 오도록 역순 정렬해 보여준다.
- * 각 카드는 수면/몸무게 값과 전일 대비 증감, 그리고 몸무게의 첫날 대비 증감을 표시한다.
+ * 수면은 "취침 → 기상 · 소요시간", 몸무게는 값 + 전일 대비, 그리고 첫날 대비를 표시한다.
  */
 export function RecordList({
   stats,
@@ -55,9 +58,12 @@ export function RecordList({
               <span className="text-neutral-500">수면</span>
               <span className="flex items-baseline gap-2">
                 <span className="text-base font-medium text-neutral-900 dark:text-neutral-50">
-                  {row.sleepHours}시간
+                  {formatClock(row.sleepStart)} → {formatClock(row.sleepEnd)}
                 </span>
-                <DeltaBadge value={row.sleepDelta} unit="h" />
+                <span className="text-neutral-500">
+                  · {formatHM(row.sleepMinutes)}
+                </span>
+                <DeltaBadge value={row.sleepDeltaMinutes} format={formatHM} />
               </span>
             </div>
 
@@ -67,7 +73,7 @@ export function RecordList({
                 <span className="text-base font-medium text-neutral-900 dark:text-neutral-50">
                   {row.weightKg}kg
                 </span>
-                <DeltaBadge value={row.weightDelta} unit="kg" />
+                <DeltaBadge value={row.weightDelta} format={kg} />
               </span>
             </div>
 
@@ -75,7 +81,7 @@ export function RecordList({
               <div className="mt-0.5 text-right text-xs">
                 <DeltaBadge
                   value={row.weightDeltaFromStart}
-                  unit="kg"
+                  format={kg}
                   label="첫날 대비"
                 />
               </div>
