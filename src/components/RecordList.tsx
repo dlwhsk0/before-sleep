@@ -79,18 +79,14 @@ function WeightRow({ row }: { row: RecordStats }) {
             <span className="text-xs text-neutral-400">눌러서 보기</span>
           )}
           <DeltaBadge value={row.weightDelta} format={kg} />
+          {/* 괄호 안 값 = 첫날 대비 (라벨은 리스트 헤더에 표기) */}
+          {row.weightDeltaFromStart !== null && (
+            <span className="flex items-baseline text-neutral-400">
+              (<DeltaBadge value={row.weightDeltaFromStart} format={kg} />)
+            </span>
+          )}
         </span>
       </button>
-
-      {row.weightDeltaFromStart !== null && (
-        <div className="mt-0.5 text-right text-xs">
-          <DeltaBadge
-            value={row.weightDeltaFromStart}
-            format={kg}
-            label="첫날 대비"
-          />
-        </div>
-      )}
     </>
   )
 }

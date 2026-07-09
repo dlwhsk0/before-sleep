@@ -56,7 +56,10 @@ function App() {
           <RecordForm records={records} onSave={save} />
           <section className="flex flex-col gap-3">
             <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-50">
-              기록
+              기록{' '}
+              <span className="text-xs font-normal text-neutral-400">
+                (첫날 대비)
+              </span>
             </h2>
             {loading ? (
               <p className="py-8 text-center text-sm text-neutral-400">
