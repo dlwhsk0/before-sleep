@@ -21,7 +21,7 @@ export function RecordForm({
   const [date, setDate] = useState(todayKey())
   const [sleepStart, setSleepStart] = useState(DEFAULT_START)
   const [sleepEnd, setSleepEnd] = useState(DEFAULT_END)
-  const [weight, setWeight] = useState('')
+  const [weight, setWeight] = useState('0.0')
   const [saving, setSaving] = useState(false)
 
   const existing = records.find((r) => r.date === date)
@@ -156,7 +156,6 @@ export function RecordForm({
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             onBlur={normalizeWeight}
-            placeholder="예: 68.2"
             className="w-28 rounded-lg border border-neutral-300 px-3 py-2 text-center text-lg outline-none focus:border-neutral-900 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
           />
           <button

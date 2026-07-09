@@ -1,9 +1,50 @@
+import { useState } from 'react'
 import type { RecordStats } from '../types'
 import { todayKey } from '../lib/date'
 import { formatClock, formatHM } from '../lib/time'
 import { DeltaBadge } from './DeltaBadge'
 
 const kg = (n: number) => `${n.toFixed(1)}kg`
+
+/**
+ * 몸무게 행. 절대값은 숨기고 증감값(전일·첫날 대비)만 보여준다.
+ * 실제 몸무게가 궁금하면 탭해서 상세로 펼친다. (숫자를 매일 마주하고 싶지 않은 사용자 배려)
+ */
+function WeightRow({ row }: { row: RecordStats }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-baseline justify-between text-left"
+        aria-expanded={open}
+      >
+        <span className="text-neutral-500">몸무게</span>
+        <span className="flex items-baseline gap-2">
+          {open ? (
+            <span className="text-base font-medium text-neutral-900 dark:text-neutral-50">
+              {kg(row.weightKg)}
+            </span>
+          ) : (
+            <span className="text-xs text-neutral-400">탭하여 보기</span>
+          )}
+          <DeltaBadge value={row.weightDelta} format={kg} />
+        </span>
+      </button>
+
+      {row.weightDeltaFromStart !== null && (
+        <div className="mt-0.5 text-right text-xs">
+          <DeltaBadge
+            value={row.weightDeltaFromStart}
+            format={kg}
+            label="첫날 대비"
+          />
+        </div>
+      )}
+    </>
+  )
+}
 
 /**
  * 기록 카드 리스트. 최신 날짜가 위로 오도록 역순 정렬해 보여준다.
@@ -67,25 +108,7 @@ export function RecordList({
               </span>
             </div>
 
-            <div className="flex items-baseline justify-between">
-              <span className="text-neutral-500">몸무게</span>
-              <span className="flex items-baseline gap-2">
-                <span className="text-base font-medium text-neutral-900 dark:text-neutral-50">
-                  {row.weightKg.toFixed(1)}kg
-                </span>
-                <DeltaBadge value={row.weightDelta} format={kg} />
-              </span>
-            </div>
-
-            {row.weightDeltaFromStart !== null && (
-              <div className="mt-0.5 text-right text-xs">
-                <DeltaBadge
-                  value={row.weightDeltaFromStart}
-                  format={kg}
-                  label="첫날 대비"
-                />
-              </div>
-            )}
+            <WeightRow row={row} />
           </div>
         </li>
       ))}
