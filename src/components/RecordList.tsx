@@ -8,26 +8,35 @@ const kg = (n: number) => `${n.toFixed(1)}kg`
 
 /**
  * 몸무게 행. 절대값은 숨기고 증감값(전일·첫날 대비)만 보여준다.
- * 실제 몸무게가 궁금하면 탭해서 상세로 펼친다. (숫자를 매일 마주하고 싶지 않은 사용자 배려)
+ * 실제 몸무게는 버튼을 **누르고 있는 동안에만** 잠깐 드러난다. 손을 떼면 다시 가려진다.
+ * (숫자를 매일 마주하고 싶지 않은 사용자 배려)
  */
 function WeightRow({ row }: { row: RecordStats }) {
-  const [open, setOpen] = useState(false)
+  const [peek, setPeek] = useState(false)
+  const hide = () => setPeek(false)
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-baseline justify-between text-left"
-        aria-expanded={open}
+        onPointerDown={() => setPeek(true)}
+        onPointerUp={hide}
+        onPointerLeave={hide}
+        onPointerCancel={hide}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') setPeek(true)
+        }}
+        onKeyUp={hide}
+        onBlur={hide}
+        className="flex w-full touch-none items-baseline justify-between text-left"
       >
         <span className="text-neutral-500">몸무게</span>
         <span className="flex items-baseline gap-2">
-          {open ? (
+          {peek ? (
             <span className="text-base font-medium text-neutral-900 dark:text-neutral-50">
               {kg(row.weightKg)}
             </span>
           ) : (
-            <span className="text-xs text-neutral-400">탭하여 보기</span>
+            <span className="text-xs text-neutral-400">눌러서 보기</span>
           )}
           <DeltaBadge value={row.weightDelta} format={kg} />
         </span>
