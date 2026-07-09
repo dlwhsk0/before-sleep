@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { durationMinutes, formatClock, formatHM } from '../lib/time'
+import { durationMinutes, formatClock } from '../lib/time'
 
 /**
  * 단일 24시간 원형 다이얼로 수면 시각을 정한다.
@@ -16,8 +16,8 @@ const R = 100
 const HANDLE = 15
 const SNAP = 5 // 분
 
-const START_COLOR = '#6366f1' // indigo (취침)
-const END_COLOR = '#f59e0b' // amber (기상)
+export const START_COLOR = '#6366f1' // indigo (취침)
+export const END_COLOR = '#f59e0b' // amber (기상)
 
 /** 값 비율(0~1)을 원 위 좌표로. 12시 방향(위)이 0, 시계방향. */
 function polar(r: number, frac: number) {
@@ -97,12 +97,11 @@ export function SleepClock({
   const arcPath = `M ${arcStart.x} ${arcStart.y} A ${R} ${R} 0 ${largeArc} 1 ${arcEnd.x} ${arcEnd.y}`
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${SIZE} ${SIZE}`}
-        className="w-full max-w-[260px] touch-none select-none"
-      >
+    <svg
+      ref={svgRef}
+      viewBox={`0 0 ${SIZE} ${SIZE}`}
+      className="w-32 shrink-0 touch-none select-none sm:w-36"
+    >
         {/* 링 가이드 */}
         <circle
           cx={C}
@@ -156,24 +155,6 @@ export function SleepClock({
           )
         })}
 
-        {/* 중앙 요약 */}
-        <text
-          x={C}
-          y={C - 4}
-          textAnchor="middle"
-          className="fill-neutral-900 text-[16px] font-semibold dark:fill-neutral-100"
-        >
-          {formatHM(dur)}
-        </text>
-        <text
-          x={C}
-          y={C + 15}
-          textAnchor="middle"
-          className="fill-neutral-400 text-[11px]"
-        >
-          {formatClock(start)} → {formatClock(end)}
-        </text>
-
         {/* 핸들 (취침 / 기상) */}
         {handles.map((h) => {
           const p = polar(R, h.value / 1440)
@@ -198,30 +179,5 @@ export function SleepClock({
           )
         })}
       </svg>
-
-      {/* 범례 */}
-      <div className="flex gap-4 text-sm">
-        <span className="flex items-center gap-1.5 text-neutral-500">
-          <span
-            className="inline-block h-2.5 w-2.5 rounded-full"
-            style={{ background: START_COLOR }}
-          />
-          취침{' '}
-          <span className="font-medium text-neutral-900 dark:text-neutral-50">
-            {formatClock(start)}
-          </span>
-        </span>
-        <span className="flex items-center gap-1.5 text-neutral-500">
-          <span
-            className="inline-block h-2.5 w-2.5 rounded-full"
-            style={{ background: END_COLOR }}
-          />
-          기상{' '}
-          <span className="font-medium text-neutral-900 dark:text-neutral-50">
-            {formatClock(end)}
-          </span>
-        </span>
-      </div>
-    </div>
   )
 }

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { DailyRecord } from '../types'
 import { todayKey } from '../lib/date'
-import { addMinutes, durationMinutes } from '../lib/time'
-import { SleepClock } from './SleepClock'
+import { addMinutes, durationMinutes, formatClock, formatHM } from '../lib/time'
+import { END_COLOR, SleepClock, START_COLOR } from './SleepClock'
 
 const DEFAULT_START = 23 * 60 // 23:00
 const DEFAULT_END = 7 * 60 // 07:00
@@ -99,40 +99,75 @@ export function RecordForm({
         />
       </div>
 
-      {/* 수면: 드래그 슬라이더 */}
+      {/* 수면: 왼쪽 원형 다이얼 + 오른쪽 세부/소요 */}
       <div className="flex flex-col gap-3">
         <span className="text-sm text-neutral-500">수면</span>
-        <SleepClock
-          start={sleepStart}
-          end={sleepEnd}
-          onChange={(s, en) => {
-            setSleepStart(s)
-            setSleepEnd(en)
-          }}
-        />
+        <div className="flex items-center gap-4">
+          <SleepClock
+            start={sleepStart}
+            end={sleepEnd}
+            onChange={(s, en) => {
+              setSleepStart(s)
+              setSleepEnd(en)
+            }}
+          />
 
-        {/* 소요 시간 직접 수정 (취침 고정, 기상 이동) */}
-        <div className="flex items-center justify-center gap-2 text-sm">
-          <span className="text-neutral-500">소요</span>
-          <input
-            type="number"
-            min="0"
-            max="23"
-            value={durH}
-            onChange={(e) => setDuration(Number(e.target.value), durM)}
-            className="w-14 rounded-lg border border-neutral-300 px-2 py-1 text-right outline-none focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
-          />
-          <span className="text-neutral-500">시간</span>
-          <input
-            type="number"
-            min="0"
-            max="59"
-            step="5"
-            value={durM}
-            onChange={(e) => setDuration(durH, Number(e.target.value))}
-            className="w-14 rounded-lg border border-neutral-300 px-2 py-1 text-right outline-none focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
-          />
-          <span className="text-neutral-500">분</span>
+          {/* 오른쪽: 취침/기상 세부 + 총 수면시간 + 소요 편집 */}
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <div className="flex flex-col gap-1.5 text-sm">
+              <span className="flex items-center gap-1.5 text-neutral-500">
+                <span
+                  className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ background: START_COLOR }}
+                />
+                취침
+                <span className="font-medium text-neutral-900 dark:text-neutral-50">
+                  {formatClock(sleepStart)}
+                </span>
+              </span>
+              <span className="flex items-center gap-1.5 text-neutral-500">
+                <span
+                  className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ background: END_COLOR }}
+                />
+                기상
+                <span className="font-medium text-neutral-900 dark:text-neutral-50">
+                  {formatClock(sleepEnd)}
+                </span>
+              </span>
+            </div>
+
+            {/* 소요 총 수면시간 + 직접 편집 (취침 고정, 기상 이동) */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-baseline gap-2">
+                <span className="text-sm text-neutral-500">소요</span>
+                <span className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
+                  {formatHM(dur)}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-sm">
+                <input
+                  type="number"
+                  min="0"
+                  max="23"
+                  value={durH}
+                  onChange={(e) => setDuration(Number(e.target.value), durM)}
+                  className="w-12 rounded-lg border border-neutral-300 px-2 py-1 text-right outline-none focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
+                />
+                <span className="text-neutral-500">시간</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  step="5"
+                  value={durM}
+                  onChange={(e) => setDuration(durH, Number(e.target.value))}
+                  className="w-12 rounded-lg border border-neutral-300 px-2 py-1 text-right outline-none focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
+                />
+                <span className="text-neutral-500">분</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
