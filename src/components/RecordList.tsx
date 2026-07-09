@@ -7,6 +7,46 @@ import { DeltaBadge } from './DeltaBadge'
 const kg = (n: number) => `${n.toFixed(1)}kg`
 
 /**
+ * 삭제 버튼. 한 번에 지우지 않고 "삭제 · 취소" 인라인 확인을 한 번 거친다.
+ * 실수로 기록이 날아가지 않도록.
+ */
+function DeleteButton({ onConfirm }: { onConfirm: () => Promise<void> }) {
+  const [confirming, setConfirming] = useState(false)
+
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        className="text-xs text-neutral-400 hover:text-red-500"
+      >
+        삭제
+      </button>
+    )
+  }
+
+  return (
+    <span className="flex items-center gap-2 text-xs">
+      <span className="text-neutral-500">삭제할까요?</span>
+      <button
+        type="button"
+        onClick={() => onConfirm()}
+        className="font-medium text-red-500 hover:text-red-600"
+      >
+        삭제
+      </button>
+      <button
+        type="button"
+        onClick={() => setConfirming(false)}
+        className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+      >
+        취소
+      </button>
+    </span>
+  )
+}
+
+/**
  * 몸무게 행. 절대값은 숨기고 증감값(전일·첫날 대비)만 보여준다.
  * 실제 몸무게는 버튼을 **누르고 있는 동안에만** 잠깐 드러난다. 손을 떼면 다시 가려진다.
  * (숫자를 매일 마주하고 싶지 않은 사용자 배려)
@@ -94,13 +134,7 @@ export function RecordList({
                 </span>
               )}
             </span>
-            <button
-              type="button"
-              onClick={() => onDelete(row.date)}
-              className="text-xs text-neutral-400 hover:text-red-500"
-            >
-              삭제
-            </button>
+            <DeleteButton onConfirm={() => onDelete(row.date)} />
           </div>
 
           <div className="flex flex-col gap-1 text-sm">
