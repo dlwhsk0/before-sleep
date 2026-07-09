@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: '건강 기록',
-        short_name: '건강기록',
+        name: '비실대지말자!',
+        short_name: '비실대지말자',
         description: '수면과 몸무게를 매일 기록하고 추이를 보는 앱',
         lang: 'ko',
         theme_color: '#6366f1',

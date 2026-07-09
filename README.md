@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="public/pwa-192x192.png" width="96" alt="건강 기록 아이콘" />
+<img src="public/pwa-192x192.png" width="96" alt="비실대지말자! 아이콘" />
 
-# 건강 기록
+# 비실대지말자!
 
 **수면과 몸무게, 딱 두 가지만 매일 기록하는 미니멀 건강 관리 앱**
 
