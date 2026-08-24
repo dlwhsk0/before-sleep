@@ -9,6 +9,8 @@ interface HealthDB extends DBSchema {
   }
 }
 
+// 앱 이름이 '자기 전에'로 바뀌었어도 DB 이름은 그대로 둔다.
+// 바꾸면 기존 사용자의 IndexedDB가 새 DB로 갈려서 기록이 전부 사라진다.
 const DB_NAME = 'health-tracker'
 const DB_VERSION = 2
 const STORE = 'records'

@@ -12,9 +12,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: '비실대지말자!',
-        short_name: '비실대지말자',
-        description: '수면과 몸무게를 매일 기록하고 추이를 보는 앱',
+        name: '자기 전에',
+        short_name: '자기 전에',
+        description: '자기 전에 틀어놓을 긴 영상 하나를 미리 골라두는 앱',
         lang: 'ko',
         theme_color: '#6366f1',
         background_color: '#ffffff',

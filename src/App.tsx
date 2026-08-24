@@ -28,9 +28,11 @@ function App() {
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-4 py-8">
       <header>
         <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-50">
-          비실대지말자!
+          자기 전에
         </h1>
-        <p className="text-sm text-neutral-500">수면과 몸무게를 매일 기록해요</p>
+        <p className="text-sm text-neutral-500">
+          자기 전에 틀 영상 하나를 미리 골라둬요
+        </p>
       </header>
 
       {/* 탭 바 */}
@@ -93,7 +95,7 @@ function App() {
 
       <footer className="mt-auto flex items-center justify-center gap-4 pt-8 text-xs text-neutral-400">
         <a
-          href="https://github.com/dlwhsk0/health-tracker"
+          href="https://github.com/dlwhsk0/before-sleep"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 transition-colors hover:text-neutral-600 dark:hover:text-neutral-300"
@@ -111,7 +113,7 @@ function App() {
         </a>
         <span aria-hidden="true">·</span>
         <a
-          href="https://github.com/dlwhsk0/health-tracker/issues/new"
+          href="https://github.com/dlwhsk0/before-sleep/issues/new"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 transition-colors hover:text-neutral-600 dark:hover:text-neutral-300"
