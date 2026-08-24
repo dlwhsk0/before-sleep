@@ -16,10 +16,15 @@
 
 ### 메인 — 자기 전 영상
 
-- **대기 목록(큐)**: 보고 싶은 영상 링크를 미리 쌓아둔다. 링크 붙여넣기 → 목록에 추가.
-- **오늘 밤**: 대기 목록에서 하나를 골라 "오늘 밤 영상"으로 지정. 재생 버튼으로 원본 링크 열기.
-- 유튜브 링크는 제목·섬네일을 자동으로 가져온다. 그 외(넷플릭스·웨이브·디즈니+ 등)는 제목 수동 입력.
-- 영상 길이는 **선택 입력**(수동). oEmbed가 길이를 주지 않기 때문. "긴 영상 고르기"에 도움이 되므로 입력하면 표시한다.
+- **대기 목록(큐)**: 보고 싶은 것을 미리 쌓아둔다. **입력은 한 줄 텍스트 하나**로,
+  사용자가 URL을 붙여넣든 제목을 그냥 쓰든 같은 필드에 들어간다.
+  (예: `https://youtu.be/xxxx` / `넷플릭스 다큐 3화`)
+- **오늘 밤**: 대기 목록에서 하나를 골라 "오늘 밤"으로 지정. URL이면 눌러서 원본 열기.
+- **썸네일**: 유튜브 URL이면 영상 ID로 썸네일 이미지 주소를 계산해 보여준다.
+  `https://img.youtube.com/vi/<ID>/hqdefault.jpg` — `<img src>`에 꽂기만 하면 되므로
+  **네트워크 요청(fetch)·API 키·로딩 상태가 전혀 필요 없다.**
+- 제목은 **사용자가 직접 쓴다.** 앱이 제목을 가져오지 않는다.
+- 영상 길이는 **선택 입력**(수동). "긴 영상 고르기"에 도움이 되므로 입력하면 표시한다.
 
 ### 부가 — 데일리 기록 (기존 유지)
 
@@ -39,7 +44,7 @@
 
 | 탭 | 내용 |
 | --- | --- |
-| **오늘 밤** | 오늘 밤 영상 + 대기 목록 + 링크 추가 |
+| **오늘 밤** | 오늘 밤 볼 것 + 대기 목록(썸네일) + 한 줄 추가 |
 | **기록** | 수면·몸무게 입력 폼 + 기록 목록 |
 | **통계** | 월별 캘린더 + 추이 차트 |
 
@@ -51,30 +56,30 @@
 - **스타일: Tailwind CSS v4** (`@tailwindcss/vite` 플러그인, `@import 'tailwindcss'`)
 - **PWA** (`vite-plugin-pwa`): 매니페스트 + 서비스워커(오프라인 프리캐시), "홈 화면에 추가" 지원.
   앱 아이콘 원본은 `public/icon.svg`, PNG(192/512/apple-touch)는 macOS `qlmanage`+`sips`로 생성.
-- **영상 메타데이터: YouTube oEmbed** (`https://www.youtube.com/oembed`) — CORS를 허용하므로
-  브라우저에서 직접 호출한다. 백엔드·API 키 불필요. 실패하거나 오프라인이면 링크만 저장하고 넘어간다.
+- **외부 API 없음.** 영상 제목은 사용자가 직접 쓰고, 썸네일은 URL에서 ID를 뽑아
+  주소를 문자열로 조립할 뿐이다(`img.youtube.com`). oEmbed·YouTube Data API를 쓰지 않는다.
 
 여러 기기 동기화가 필요해지기 전까지 백엔드는 도입하지 않는다.
 
 ## 데이터 모델
 
 ```ts
-type Video = {
+// 영상 파일이 아니라 "볼 것 한 줄"을 담는다. 저장되는 건 전부 텍스트.
+type WatchItem = {
   id: string               // crypto.randomUUID()
-  url: string              // 원본 링크 (열 때 이걸 씀)
-  title: string            // 유튜브는 자동, 그 외는 수동
-  thumbnailUrl?: string    // 유튜브 oEmbed에서만
+  text: string             // 사용자가 직접 쓴 한 줄. URL이거나 그냥 제목
+  note?: string            // 선택. text에 URL을 넣었을 때 붙이는 제목·메모
   durationMinutes?: number // 선택 입력
   addedAt: string          // ISO 8601
   archived?: boolean       // true면 대기 목록에서 숨김 (다 봤음)
 }
 
 type DailyRecord = {
-  date: string         // "YYYY-MM-DD", 하루 한 개 (기본 키)
-  sleepStart?: number  // 취침 시각, 자정 기준 분 (0–1439). 예: 23:30 → 1410
-  sleepEnd?: number    // 기상 시각, 자정 기준 분 (0–1439). 예: 07:15 → 435
-  weightKg?: number    // 예: 68.2
-  videoId?: string     // 그날 밤 틀은 영상 (Video.id 참조)
+  date: string           // "YYYY-MM-DD", 하루 한 개 (기본 키)
+  sleepStart?: number    // 취침 시각, 자정 기준 분 (0–1439). 예: 23:30 → 1410
+  sleepEnd?: number      // 기상 시각, 자정 기준 분 (0–1439). 예: 07:15 → 435
+  weightKg?: number      // 예: 68.2
+  watchItemId?: string   // 그날 밤 틀은 것 (WatchItem.id 참조)
 }
 ```
 
@@ -83,12 +88,14 @@ type DailyRecord = {
   통계·목록은 값이 없는 날을 건너뛰어야 한다.
 - 수면은 **시작/종료 시각**으로 기록하고 소요 시간은 파생한다(단일 진실 원천).
   자정을 넘기는 수면은 `(end - start + 1440) % 1440`으로 계산 (`src/lib/time.ts`).
-- **영상의 재생 여부는 파생값이다.** `Video`에 저장하지 않고, `DailyRecord.videoId`를
-  훑어서 "마지막으로 틀은 날"을 구한다. 같은 영상을 여러 날 틀 수 있다.
+- **`WatchItem`은 `text` 한 줄이 단일 진실 원천이다.** URL 여부·유튜브 ID·썸네일 주소·표시용
+  라벨은 전부 `text`에서 파생한다(`src/lib/watchItem.ts`). 파싱 결과를 따로 저장하지 않는다.
+- **재생 여부도 파생값이다.** `WatchItem`에 저장하지 않고, `DailyRecord.watchItemId`를
+  훑어서 "마지막으로 틀은 날"을 구한다. 같은 것을 여러 날 틀 수 있다.
 - IndexedDB 이름은 `'health-tracker'`로 **유지한다** — 바꾸면 기존 사용자 데이터가 날아간다.
   스키마 버전은 **3**. 마이그레이션은 `src/lib/db.ts`의 `upgrade`에 있다.
   - v1 → v2: `sleepHours` → `sleepStart`/`sleepEnd`
-  - v2 → v3: `videos` 스토어 추가 (`keyPath: 'id'`). 기존 `records`는 손대지 않는다
+  - v2 → v3: `watchlist` 스토어 추가 (`keyPath: 'id'`). 기존 `records`는 손대지 않는다
     (필드가 optional로 넓어진 것뿐이라 데이터 변환이 필요 없다).
 
 ### 통계 계산 규칙
@@ -102,8 +109,11 @@ type DailyRecord = {
 
 - 날짜 키 포맷은 항상 `YYYY-MM-DD` 로컬 날짜. UTC 변환으로 날짜가 밀리지 않게 주의.
 - 시각은 "자정 기준 분(0–1439)"으로 다룬다. 표시/파싱은 `src/lib/time.ts` 유틸 사용.
-- 영상 URL 파싱·정규화(유튜브 ID 추출, 중복 판정)는 `src/lib/video.ts`에 모은다.
+- `WatchItem.text` 해석(URL인지 판정, 유튜브 ID 추출, 썸네일 주소 조립, 표시용 라벨)은
+  `src/lib/watchItem.ts`에 모은다. 순수 함수만 두고 네트워크 호출은 넣지 않는다.
   `youtu.be/ID`, `youtube.com/watch?v=ID`, `/shorts/ID`, `/live/ID`, `m.youtube.com` 모두 인식.
+- **"영상"이라는 말이 실제 영상 파일 저장으로 오해되지 않게** 타입·스토어 이름은
+  `WatchItem`/`watchlist`를 쓴다. 저장하는 것은 텍스트뿐이다.
 - 수면 입력은 **단일 24시간 원형 다이얼**(`src/components/SleepClock.tsx`): 취침/기상 두 핸들을
   드래그/방향키로 조정(5분 스냅), 사이를 호로 이어 수면 구간 표시. 소요 시간 미세조정은 폼의 숫자 입력.
 - 몸무게는 소수점 한 자리까지.
@@ -121,8 +131,9 @@ type DailyRecord = {
 ## 개편 단계 (진행 상황)
 
 - [x] 단계 R0 — 리네이밍(앱 이름·매니페스트·레포 링크) + 이 CLAUDE.md
-- [ ] 단계 R1 — 데이터 계층: `DailyRecord` optional화, `videos` 스토어(v3), `video.ts` URL 파싱 + 테스트
-- [ ] 단계 R2 — '오늘 밤' 탭: 링크 추가 폼, 대기 목록, 오늘 밤 영상 지정·재생
+- [ ] 단계 R1 — 데이터 계층: `DailyRecord` optional화, `watchlist` 스토어(v3),
+      `watchItem.ts` 텍스트 파싱(URL 판정·유튜브 ID·썸네일 주소) + 테스트
+- [ ] 단계 R2 — '오늘 밤' 탭: 한 줄 추가 폼, 대기 목록(썸네일), 오늘 밤 지정·열기
 - [ ] 단계 R3 — 3탭 재편 + 기존 기록/통계 화면을 optional 필드에 맞게 보정
 - [ ] 단계 R4 — 아이콘·매니페스트 마무리, 마이그레이션 실기기 확인
 
