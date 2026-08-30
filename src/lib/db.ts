@@ -36,9 +36,55 @@ const DEFAULT_SLEEP_START = 23 * 60 // 23:00, 레거시 데이터에 취침 시�
 
 let dbPromise: Promise<IDBPDatabase<HealthDB>> | null = null
 
+/**
+ * DB 열기가 이 시간을 넘으면 실패로 본다.
+ *
+ * IndexedDB 열기는 거부되지 않고 **그대로 멈추는** 경우가 있다. 대표적으로
+ * 다른 탭이 옛 버전을 붙잡고 있을 때(blocked)와, 브라우저가 사이트 데이터를
+ * 막아둔 경우다. 시간 제한이 없으면 화면이 '불러오는 중'에 영원히 갇힌다.
+ */
+const OPEN_TIMEOUT_MS = 8000
+
+/** 다른 탭이 옛 버전을 잡고 있어 업그레이드가 막혔는지. 오류 문구를 고르는 데 쓴다. */
+let blockedByOtherTab = false
+
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(
+        new Error(
+          blockedByOtherTab
+            ? '다른 탭에서 이 앱이 열려 있어 저장소를 열지 못했습니다. 다른 탭을 닫고 새로고침해 주세요.'
+            : '저장소를 여는 데 실패했습니다.',
+        ),
+      )
+    }, ms)
+    p.then(
+      (v) => {
+        clearTimeout(timer)
+        resolve(v)
+      },
+      (e) => {
+        clearTimeout(timer)
+        reject(e)
+      },
+    )
+  })
+}
+
 function getDb(): Promise<IDBPDatabase<HealthDB>> {
   if (!dbPromise) {
-    dbPromise = openDB<HealthDB>(DB_NAME, DB_VERSION, {
+    const opening = openDB<HealthDB>(DB_NAME, DB_VERSION, {
+      // 다른 탭이 옛 버전을 열어둬서 업그레이드가 막힌 상태.
+      blocked() {
+        blockedByOtherTab = true
+      },
+      // 다른 탭이 새 버전으로 올리려 한다. 이 탭의 연결을 놓아 줘서
+      // 저쪽 업그레이드가 막히지 않게 한다.
+      blocking() {
+        void dbPromise?.then((db) => db.close()).catch(() => {})
+        dbPromise = null
+      },
       async upgrade(db, oldVersion, _newVersion, tx) {
         // v1: 스토어 생성 (date를 keyPath로 → 하루 한 개)
         if (oldVersion < 1) {
@@ -75,6 +121,12 @@ function getDb(): Promise<IDBPDatabase<HealthDB>> {
           db.createObjectStore(MEMOS, { keyPath: 'id' })
         }
       },
+    })
+
+    // 실패하면 캐시를 비워 다음 호출에서 다시 시도할 수 있게 한다.
+    dbPromise = withTimeout(opening, OPEN_TIMEOUT_MS).catch((e) => {
+      dbPromise = null
+      throw e
     })
   }
   return dbPromise
