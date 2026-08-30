@@ -18,7 +18,7 @@ const SNAP = 5 // 분
 
 // 호는 땅거미에서 동틀녘으로 건너간다. 끝점은 앱의 유일한 강조색과 같다.
 export const START_COLOR = 'var(--c-dusk)'
-export const END_COLOR = 'var(--c-ember)'
+export const END_COLOR = 'var(--c-accent)'
 
 /** 값 비율(0~1)을 원 위 좌표로. 12시 방향(위)이 0, 시계방향. */
 function polar(r: number, frac: number) {

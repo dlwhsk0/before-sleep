@@ -12,24 +12,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
       workbox: {
-        // 웹폰트는 빌드 산출물이 아니라 런타임에 받으므로 따로 캐시해야
-        // 오프라인에서도 같은 글꼴로 뜬다.
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\//,
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'google-fonts-stylesheets' },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\//,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-webfonts',
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-        ],
+        // 기본 globPatterns에 woff2가 없어서 자체 호스팅 굴림이 프리캐시에서 빠진다.
+        // 빠지면 오프라인에서 글꼴만 시스템 폰트로 바뀐다.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
       },
       manifest: {
         name: '자기 전에',

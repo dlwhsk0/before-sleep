@@ -87,7 +87,7 @@ export function MonthCalendar({ recordedDates }: { recordedDates: string[] }) {
               <span
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-xs ${
                   isRecorded
-                    ? 'bg-ember font-medium text-bg'
+                    ? 'bg-accent font-medium text-bg'
                     : isToday
                       ? 'text-dim ring-1 ring-line'
                       : 'text-faint'

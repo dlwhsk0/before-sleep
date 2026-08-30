@@ -154,37 +154,58 @@ type Settings = {
 
 ## 디자인
 
-이 앱은 **불 끈 방에서, 자려고 누운 상태로** 쓴다. 그 사실이 색과 배치를 결정한다.
+이 앱은 **불 끈 방에서, 자려고 누운 상태로** 쓴다. 그래서 **다크가 기본이고 라이트가 예외다.**
+토큰도 그 순서로 짠다.
 
-- **다크가 기본이고 라이트가 예외다.** 대부분의 앱과 반대 순서로 토큰을 짠다.
-- **색조는 따뜻한 쪽.** 청색광은 멜라토닌을 억제하므로 취침 직전 앱에서 파란 강조색은
-  목적에 어긋난다. 전신 앱의 indigo(`#6366f1`)를 버린 이유다.
-- **강조색은 `--c-ember` 하나뿐**이고 "오늘 밤"과 활성 상태에만 쓴다.
-  화면에서 채도를 가진 것은 **영상 썸네일뿐**이어서 눈이 곧장 "오늘 뭘 볼지"로 간다.
+- **팔레트는 깊은 남색 밤하늘 계열.** 배경 `#0d1117`, 카드 `#161b24`, 강조 `#6ea8ff`.
+- **강조색은 `--c-accent` 하나뿐**이고 "오늘 밤"과 활성 상태에만 쓴다.
+  화면에서 채도를 크게 가진 것은 **영상 썸네일**이어야 눈이 곧장 "오늘 뭘 볼지"로 간다.
   새 색을 추가하고 싶으면 이 원칙을 먼저 다시 볼 것.
 - **밤이 깊을수록 화면이 스스로 어두워진다** (`src/lib/nightDim.ts`). 21시에 0에서 시작해
   새벽 3시에 상한(0.12)에 닿고 6시에 0으로 돌아온다. 색 토큰을 다시 계산하는 대신
-  따뜻한 근접 흑 오버레이 한 장을 덮어 썸네일까지 고르게 가라앉힌다.
+  `--c-dim-veil` 오버레이 한 장을 덮어 썸네일까지 고르게 가라앉힌다.
   상한은 본문 대비가 WCAG AA를 한참 넘는 선에서 멈춘다. 설정에서 끌 수 있다.
 - **대비 하한**: 본문·라벨·조작 대상은 전부 배경 대비 **4.5:1 이상**. `--c-text-faint`가
-  그 경계선(4.6:1)이므로 이보다 어두운 텍스트 색을 새로 만들지 말 것.
+  그 경계선(다크 4.98:1 / 라이트 4.81:1)이므로 이보다 어두운 텍스트 색을 새로 만들지 말 것.
 
 ### 토큰
 
 색은 `src/index.css`의 `--c-*`에 정의하고 `@theme`에서 Tailwind 유틸리티로 노출한다
-(`bg-bg`, `text-ink`, `text-dim`, `text-faint`, `border-line`, `text-ember` …).
+(`bg-bg`, `text-ink`, `text-dim`, `text-faint`, `border-line`, `text-accent` …).
 **컴포넌트에 `neutral-*` 같은 Tailwind 기본 색이나 `dark:` 변형을 쓰지 않는다** —
 토큰이 두 테마를 모두 처리한다.
 
-글꼴 세 가지 역할:
+### 글꼴
 
-- **본문**: 시스템 한글 스택(`-apple-system` → Apple SD Gothic Neo). 웹폰트 없이 즉시 그려지고 오프라인에 안전.
-- **표제**(`--font-display`): `Gowun Batang`. 날짜·섹션 제목. 자려는 사람에게 산세리프보다 부드럽게 말한다.
-- **수치**(`--font-mono`): `IBM Plex Mono`. 시각은 데이터이므로 카드마다 같은 자리에 오게 고정폭.
+전부 **굴림**이다. 자체 호스팅하며 구글 폰트 등 외부 요청은 없다.
+
+- 본문·표제(`--font-sans`, `--font-display`): `Gulim` → `public/fonts/gulim-korean.woff2` (118KB)
+- 수치·시각(`--font-mono`): `GulimChe`(굴림체, 고정폭) → `public/fonts/gulimche-latin.woff2` (13KB).
   `.tnum` 클래스로 쓴다.
 
+출처는 **HanYang I&C**가 SIL Open Font License 1.1로 공개한 <https://github.com/googlefonts/gulim>.
+원본 TTF는 한자까지 포함해 3.8MB라 그대로 쓸 수 없어 서브셋했다. 다시 만들려면:
+
+```sh
+pip install fonttools brotli
+# 굴림: 한글 11,172자 전체 + 라틴/기호. 한자를 덜어내 3.8MB → 118KB
+pyftsubset gulim-Regular.ttf --output-file=public/fonts/gulim-korean.woff2 --flavor=woff2 \
+  --unicodes="U+0000-00FF,U+2000-206F,U+20A0-20BF,U+2100-214F,U+2190-21FF,U+25A0-25FF,U+3000-303F,U+3130-318F,U+AC00-D7A3,U+FF00-FFEF" \
+  --layout-features='*' --no-hinting
+# 굴림체: 수치 표기 전용이라 라틴만
+pyftsubset gulimche-Regular.ttf --output-file=public/fonts/gulimche-latin.woff2 --flavor=woff2 \
+  --unicodes="U+0000-00FF,U+2000-206F,U+2212" --layout-features='*' --no-hinting
+```
+
+굴림은 굵기가 Regular 하나뿐이라 굵은 글씨는 브라우저가 합성한다. 위계는 크기와 여백으로 잡는다.
+`vite.config.ts`의 `globPatterns`에 `woff2`가 들어 있어야 서비스워커가 폰트를 프리캐시한다
+(빠지면 오프라인에서 글꼴만 시스템 폰트로 바뀐다).
+
+### SVG
+
 SVG에서 색을 쓸 때는 `fill="var(--c-x)"` 같은 **표현 속성이 아니라 `style={{ fill: ... }}`**로
-넘긴다. 속성 값에서는 `var()`가 해석되지 않는다.
+넘긴다. 속성 값에서는 `var()`가 해석되지 않는다. 단, 인라인 `style`은 클래스를 이기므로
+`focus:stroke-*` 같은 상태 스타일이 있는 속성은 클래스로 남길 것.
 
 ## 컨벤션
 

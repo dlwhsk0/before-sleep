@@ -125,7 +125,7 @@ export function RecordList({
             <span className="text-sm font-medium text-ink">
               {row.date}
               {row.date === today && (
-                <span className="ml-2 rounded bg-ember px-1.5 py-0.5 text-xs text-bg">
+                <span className="ml-2 rounded bg-accent px-1.5 py-0.5 text-xs text-bg">
                   오늘
                 </span>
               )}

@@ -16,8 +16,8 @@ type Props = {
  * 하단 4탭바.
  *
  * 아이콘 없이 한글 라벨만 둔다. 네 단어가 모두 두 글자라 아이콘 없이도 한눈에
- * 읽히고, 화면에서 채도를 가진 것이 썸네일뿐이라는 원칙이 유지된다.
- * 활성 표시는 라벨 위의 작은 ember 점 하나.
+ * 읽히고, 화면에서 채도를 크게 가진 것이 썸네일이라는 원칙이 유지된다.
+ * 활성 표시는 라벨 위의 작은 강조색 점 하나.
  */
 export function TabBar({ value, onChange }: Props) {
   return (
@@ -42,7 +42,7 @@ export function TabBar({ value, onChange }: Props) {
               <span
                 aria-hidden="true"
                 className={`h-1 w-1 rounded-full transition-colors ${
-                  active ? 'bg-ember' : 'bg-transparent'
+                  active ? 'bg-accent' : 'bg-transparent'
                 }`}
               />
               {tab.label}

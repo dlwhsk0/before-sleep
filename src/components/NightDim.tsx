@@ -28,7 +28,7 @@ export function NightDim({ enabled }: { enabled: boolean }) {
     <div
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-30 transition-opacity duration-1000"
-      style={{ opacity, background: '#0a0806' }}
+      style={{ opacity, background: 'var(--c-dim-veil)' }}
     />
   )
 }

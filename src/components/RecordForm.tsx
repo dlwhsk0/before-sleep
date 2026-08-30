@@ -207,7 +207,7 @@ export function RecordForm({
       <button
         type="submit"
         disabled={!valid || saving}
-        className="rounded-lg bg-ember px-4 py-2.5 font-medium text-bg transition-opacity disabled:opacity-40"
+        className="rounded-lg bg-accent px-4 py-2.5 font-medium text-bg transition-opacity disabled:opacity-40"
       >
         {saving ? '저장 중…' : existing ? '기록 수정' : '기록 저장'}
       </button>
