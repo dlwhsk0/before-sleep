@@ -145,7 +145,7 @@ export function SettingsPanel({ settings, onChange, onDataChanged }: Props) {
 
       <div className="flex items-center justify-center gap-4 text-xs text-faint">
         <a
-          href="https://github.com/dlwhsk0/pleasesleep"
+          href="https://github.com/dlwhsk0/sleeptonight"
           target="_blank"
           rel="noopener noreferrer"
           className="transition-colors hover:text-dim"
@@ -154,7 +154,7 @@ export function SettingsPanel({ settings, onChange, onDataChanged }: Props) {
         </a>
         <span aria-hidden="true">·</span>
         <a
-          href="https://github.com/dlwhsk0/pleasesleep/issues/new"
+          href="https://github.com/dlwhsk0/sleeptonight/issues/new"
           target="_blank"
           rel="noopener noreferrer"
           className="transition-colors hover:text-dim"
