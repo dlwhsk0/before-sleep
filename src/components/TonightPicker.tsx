@@ -75,6 +75,18 @@ export function TonightPicker({
         </div>
 
         <form onSubmit={submit} className="flex flex-col gap-2">
+          {preview?.isUrl && (
+            <div className="flex flex-col gap-2">
+              <Thumbnail
+                src={preview.thumbnailUrl}
+                fallback={preview.host}
+                className="aspect-video w-full rounded-lg bg-surface-2 object-cover"
+                fallbackClassName="flex aspect-video w-full items-center justify-center rounded-lg bg-surface-2 text-xs text-faint"
+              />
+              <p className="truncate px-1 text-sm text-ink">{preview.label}</p>
+            </div>
+          )}
+
           <input
             ref={inputRef}
             value={text}
@@ -82,23 +94,6 @@ export function TonightPicker({
             placeholder="링크를 붙여넣거나 제목을 쓰세요"
             className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink placeholder:text-faint"
           />
-          {preview?.isUrl && (
-            <div className="flex items-center gap-3 rounded-lg border border-line bg-surface-2 p-2">
-              <Thumbnail
-                src={preview.thumbnailUrl}
-                fallback={preview.host}
-                className="h-14 w-24 shrink-0 rounded bg-surface object-cover"
-                fallbackClassName="flex h-14 w-24 shrink-0 items-center justify-center rounded bg-surface text-[0.625rem] text-faint"
-              />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm text-ink">{preview.label}</span>
-                <span className="block text-xs text-faint">
-                  {preview.youtubeId ? '유튜브 · 썸네일 있음' : `${preview.host} · 썸네일 없음`}
-                </span>
-              </span>
-            </div>
-          )}
-
           <div className="flex gap-2">
             <input
               value={note}
