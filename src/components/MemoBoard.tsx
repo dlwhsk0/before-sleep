@@ -43,10 +43,10 @@ export function MemoBoard({ memos, onAdd, onRemove }: Props) {
           }}
           rows={2}
           placeholder="떠오른 것을 적어 두세요"
-          className="w-full resize-none rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink placeholder:text-faint"
+          className="w-full resize-none rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-base text-ink placeholder:text-faint"
         />
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs text-dim">
+          <label className="flex items-center gap-2 text-[0.6875rem] text-dim">
             <input
               type="checkbox"
               checked={withDate}
@@ -58,7 +58,7 @@ export function MemoBoard({ memos, onAdd, onRemove }: Props) {
           <button
             type="submit"
             disabled={!text.trim()}
-            className="rounded-lg bg-accent px-4 py-2 text-sm text-bg transition-opacity disabled:opacity-40"
+            className="rounded-lg bg-accent px-4 py-2 text-[0.8125rem] text-bg transition-opacity disabled:opacity-40"
           >
             붙이기
           </button>
@@ -66,7 +66,7 @@ export function MemoBoard({ memos, onAdd, onRemove }: Props) {
       </form>
 
       {memos.length === 0 ? (
-        <p className="py-12 text-center text-sm text-faint">
+        <p className="py-12 text-center text-[0.8125rem] text-faint">
           아직 메모가 없어요. 위에 하나 적어 보세요.
         </p>
       ) : (
@@ -76,7 +76,7 @@ export function MemoBoard({ memos, onAdd, onRemove }: Props) {
               key={memo.id}
               className="group flex min-h-24 flex-col justify-between gap-2 rounded-lg border border-line bg-surface p-3"
             >
-              <p className="text-sm leading-snug whitespace-pre-wrap text-ink">
+              <p className="text-[0.8125rem] leading-snug whitespace-pre-wrap text-ink">
                 {memo.text}
               </p>
               <div className="flex items-baseline justify-between gap-2">

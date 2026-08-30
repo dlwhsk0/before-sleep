@@ -36,7 +36,7 @@ export function TrendChart({
 
   return (
     <div className="flex flex-col gap-1">
-      <h3 className="text-sm font-medium text-dim">{title}</h3>
+      <h3 className="text-[0.8125rem] font-medium text-dim">{title}</h3>
       <div className={`${showBrush ? 'h-52' : 'h-44'} w-full`}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -16 }}>

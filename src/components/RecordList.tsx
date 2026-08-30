@@ -18,7 +18,7 @@ function DeleteButton({ onConfirm }: { onConfirm: () => Promise<void> }) {
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="text-xs text-faint hover:text-danger"
+        className="text-[0.6875rem] text-faint hover:text-danger"
       >
         삭제
       </button>
@@ -26,7 +26,7 @@ function DeleteButton({ onConfirm }: { onConfirm: () => Promise<void> }) {
   }
 
   return (
-    <span className="flex items-center gap-2 text-xs">
+    <span className="flex items-center gap-2 text-[0.6875rem]">
       <span className="text-dim">삭제할까요?</span>
       <button
         type="button"
@@ -72,11 +72,11 @@ function WeightRow({ row }: { row: RecordStats }) {
         <span className="text-dim">몸무게</span>
         <span className="flex items-baseline gap-2">
           {peek ? (
-            <span className="text-base font-medium text-ink">
+            <span className="text-sm font-medium text-ink">
               {row.weightKg === undefined ? '—' : kg(row.weightKg)}
             </span>
           ) : (
-            <span className="text-xs text-faint">눌러서 보기</span>
+            <span className="text-[0.6875rem] text-faint">눌러서 보기</span>
           )}
           <DeltaBadge value={row.weightDelta} format={kg} />
           {/* 괄호 안 값 = 첫날 대비 (라벨은 리스트 헤더에 표기) */}
@@ -104,7 +104,7 @@ export function RecordList({
 }) {
   if (stats.length === 0) {
     return (
-      <p className="py-8 text-center text-sm text-faint">
+      <p className="py-8 text-center text-[0.8125rem] text-faint">
         아직 기록이 없어요. 위에서 오늘 기록을 저장해보세요.
       </p>
     )
@@ -122,10 +122,10 @@ export function RecordList({
           className="rounded-xl border border-line p-4"
         >
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-ink">
+            <span className="text-[0.8125rem] font-medium text-ink">
               {row.date}
               {row.date === today && (
-                <span className="ml-2 rounded bg-accent px-1.5 py-0.5 text-xs text-bg">
+                <span className="ml-2 rounded bg-accent px-1.5 py-0.5 text-[0.6875rem] text-bg">
                   오늘
                 </span>
               )}
@@ -133,7 +133,7 @@ export function RecordList({
             <DeleteButton onConfirm={() => onDelete(row.date)} />
           </div>
 
-          <div className="flex flex-col gap-1 text-sm">
+          <div className="flex flex-col gap-1 text-[0.8125rem]">
             {/* 수면·체중은 각각 없을 수 있다. 없는 값은 줄째로 건너뛴다. */}
             {row.sleepStart !== undefined &&
               row.sleepEnd !== undefined &&
@@ -141,7 +141,7 @@ export function RecordList({
                 <div className="flex items-baseline justify-between">
                   <span className="text-dim">수면</span>
                   <span className="flex items-baseline gap-2">
-                    <span className="text-base font-medium text-ink">
+                    <span className="text-sm font-medium text-ink">
                       {formatClock(row.sleepStart)} → {formatClock(row.sleepEnd)}
                     </span>
                     <span className="text-dim">· {formatHM(row.sleepMinutes)}</span>

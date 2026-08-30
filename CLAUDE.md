@@ -216,6 +216,29 @@ pyftsubset gulimche-Regular.ttf --output-file=public/fonts/gulimche-latin.woff2 
 `vite.config.ts`의 `globPatterns`에 `woff2`가 들어 있어야 서비스워커가 폰트를 프리캐시한다
 (빠지면 오프라인에서 글꼴만 시스템 폰트로 바뀐다).
 
+### 크기 체계
+
+작게 유지한다. Tailwind 기본 스케일보다 한 단계씩 작다.
+
+| 쓰임 | 클래스 | px |
+| --- | --- | --- |
+| 헤더 날짜·시각, 큰 제목 | `text-base` | 16 |
+| 섹션 제목 | `text-sm` | 14 |
+| 본문 기본 | `text-[0.8125rem]` | 13 |
+| 보조·캡션 | `text-[0.6875rem]` | 11 |
+
+**입력칸(`input`·`textarea`)만 예외로 `text-base`(16px)를 쓴다.** iOS 사파리는
+입력칸 글씨가 16px 미만이면 탭할 때 화면을 확대해 버려서, 폰에서 쓰는 앱에는
+실제로 성가시다. 줄이지 말 것.
+
+굴림은 작은 글씨용으로 만들어진 글꼴이라 크게 키우면 거칠어진다 — 위 표보다
+키우고 싶으면 글꼴부터 다시 생각할 것.
+
+### 상자
+
+**카드·헤더·입력 묶음은 같은 테두리 문법을 쓴다**: `rounded-xl border border-line bg-surface`.
+헤더의 날짜·시각도 같은 상자에 들어간다. 화면 전체가 한 문법으로 읽히도록.
+
 ### SVG
 
 SVG에서 색을 쓸 때는 `fill="var(--c-x)"` 같은 **표현 속성이 아니라 `style={{ fill: ... }}`**로

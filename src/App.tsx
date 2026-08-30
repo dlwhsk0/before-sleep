@@ -19,11 +19,11 @@ const StatsSection = lazy(() =>
 )
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-base text-ink">{children}</h2>
+  return <h2 className="text-sm text-ink">{children}</h2>
 }
 
 function Loading({ label }: { label: string }) {
-  return <p className="py-10 text-center text-sm text-faint">{label}</p>
+  return <p className="py-10 text-center text-[0.8125rem] text-faint">{label}</p>
 }
 
 /**
@@ -33,12 +33,12 @@ function Loading({ label }: { label: string }) {
 function LoadError({ detail }: { detail: string }) {
   return (
     <div className="flex flex-col items-center gap-2 py-10 text-center">
-      <p className="text-sm text-ink">기록을 불러오지 못했어요</p>
-      <p className="max-w-[20rem] text-xs leading-relaxed text-faint">
+      <p className="text-[0.8125rem] text-ink">기록을 불러오지 못했어요</p>
+      <p className="max-w-[20rem] text-[0.6875rem] leading-relaxed text-faint">
         브라우저 저장소를 열 수 없습니다. 사생활 보호 모드이거나 사이트 데이터가
         차단돼 있으면 이럴 수 있어요.
       </p>
-      <p className="max-w-[20rem] text-xs break-all text-faint">{detail}</p>
+      <p className="max-w-[20rem] text-[0.6875rem] break-all text-faint">{detail}</p>
     </div>
   )
 }

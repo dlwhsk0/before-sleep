@@ -30,18 +30,21 @@ export function AppHeader() {
   }, [])
 
   return (
-    <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-5 pt-6 pb-4">
-      <h1 className="font-[family-name:var(--font-display)] text-[1.375rem] leading-tight text-ink">
-        {dateFormat.format(now)}
-      </h1>
-      <time
-        // 날짜와 같은 글꼴. 굴림은 고정폭이 아니라 초 자리에서 폭이 조금 흔들린다.
-        // tabular-nums를 요청해 두되(지원하면 적용) 정렬은 좌측 기준이라 문제되지 않는다.
-        className="font-[family-name:var(--font-display)] text-[1.375rem] leading-tight text-dim [font-variant-numeric:tabular-nums]"
-        dateTime={now.toISOString()}
-      >
-        {formatClockSeconds(now)}
-      </time>
+    <header className="px-5 pt-6 pb-4">
+      {/* 카드와 같은 테두리 상자. 화면 전체가 같은 문법으로 읽히도록. */}
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-xl border border-line bg-surface px-3 py-2.5">
+        <h1 className="font-[family-name:var(--font-display)] text-base leading-tight text-ink">
+          {dateFormat.format(now)}
+        </h1>
+        <time
+          // 날짜와 같은 글꼴. 굴림은 고정폭이 아니라 초 자리에서 폭이 조금 흔들린다.
+          // tabular-nums를 요청해 두되(지원하면 적용) 좌측 정렬이라 크게 티나지 않는다.
+          className="font-[family-name:var(--font-display)] text-base leading-tight text-dim [font-variant-numeric:tabular-nums]"
+          dateTime={now.toISOString()}
+        >
+          {formatClockSeconds(now)}
+        </time>
+      </div>
     </header>
   )
 }

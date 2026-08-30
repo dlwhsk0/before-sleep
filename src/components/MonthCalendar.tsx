@@ -53,10 +53,10 @@ export function MonthCalendar({ recordedDates }: { recordedDates: string[] }) {
           ‹
         </button>
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-semibold text-ink">
+          <span className="text-[0.8125rem] font-semibold text-ink">
             {y}년 {m}월
           </span>
-          <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-dim">
+          <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[0.6875rem] text-dim">
             {count}일 기록
           </span>
         </div>
@@ -73,7 +73,7 @@ export function MonthCalendar({ recordedDates }: { recordedDates: string[] }) {
 
       <div className="grid grid-cols-7 gap-1 text-center">
         {WEEKDAYS.map((w) => (
-          <div key={w} className="py-1 text-xs text-faint">
+          <div key={w} className="py-1 text-[0.6875rem] text-faint">
             {w}
           </div>
         ))}
@@ -85,7 +85,7 @@ export function MonthCalendar({ recordedDates }: { recordedDates: string[] }) {
           return (
             <div key={key} className="flex aspect-square items-center justify-center">
               <span
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs ${
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-[0.6875rem] ${
                   isRecorded
                     ? 'bg-accent font-medium text-bg'
                     : isToday

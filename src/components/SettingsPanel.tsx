@@ -20,8 +20,8 @@ function Row({
   return (
     <div className="flex items-center justify-between gap-4 py-3">
       <span className="flex min-w-0 flex-col">
-        <span className="text-sm text-ink">{label}</span>
-        {hint && <span className="text-xs text-faint">{hint}</span>}
+        <span className="text-[0.8125rem] text-ink">{label}</span>
+        {hint && <span className="text-[0.6875rem] text-faint">{hint}</span>}
       </span>
       {children}
     </div>
@@ -87,7 +87,7 @@ export function SettingsPanel({ settings, onChange, onDataChanged }: Props) {
                 type="button"
                 onClick={() => onChange({ theme: t.value })}
                 aria-pressed={settings.theme === t.value}
-                className={`rounded px-3 py-1.5 text-xs transition-colors ${
+                className={`rounded px-3 py-1.5 text-[0.6875rem] transition-colors ${
                   settings.theme === t.value
                     ? 'bg-accent text-bg'
                     : 'text-dim hover:text-ink'
@@ -118,7 +118,7 @@ export function SettingsPanel({ settings, onChange, onDataChanged }: Props) {
 
       {import.meta.env.DEV && (
         <section className="flex flex-col gap-3 rounded-lg border border-dashed border-line p-4">
-          <p className="text-xs text-faint">
+          <p className="text-[0.6875rem] text-faint">
             개발용 — 빌드에는 포함되지 않습니다. 예시 데이터는 직접 쓴 기록을 덮어쓰지
             않고, 지우기는 예시로 넣은 것만 지웁니다.
           </p>
@@ -127,7 +127,7 @@ export function SettingsPanel({ settings, onChange, onDataChanged }: Props) {
               type="button"
               disabled={busy}
               onClick={() => runSample(seedSampleData)}
-              className="flex-1 rounded-lg border border-line px-3 py-2 text-sm text-ink transition-colors hover:bg-surface-2 disabled:opacity-40"
+              className="flex-1 rounded-lg border border-line px-3 py-2 text-[0.8125rem] text-ink transition-colors hover:bg-surface-2 disabled:opacity-40"
             >
               예시 데이터 채우기
             </button>
@@ -135,7 +135,7 @@ export function SettingsPanel({ settings, onChange, onDataChanged }: Props) {
               type="button"
               disabled={busy}
               onClick={() => runSample(clearSampleData)}
-              className="flex-1 rounded-lg border border-line px-3 py-2 text-sm text-dim transition-colors hover:bg-surface-2 disabled:opacity-40"
+              className="flex-1 rounded-lg border border-line px-3 py-2 text-[0.8125rem] text-dim transition-colors hover:bg-surface-2 disabled:opacity-40"
             >
               예시 데이터 지우기
             </button>
@@ -143,7 +143,7 @@ export function SettingsPanel({ settings, onChange, onDataChanged }: Props) {
         </section>
       )}
 
-      <div className="flex items-center justify-center gap-4 text-xs text-faint">
+      <div className="flex items-center justify-center gap-4 text-[0.6875rem] text-faint">
         <a
           href="https://github.com/dlwhsk0/sleeptonight"
           target="_blank"

@@ -8,7 +8,7 @@ export function ComingSoon({ step, children }: { step: string; children: string 
       <span className="tnum text-[0.6875rem] tracking-widest text-faint uppercase">
         {step}
       </span>
-      <p className="max-w-[20rem] text-sm leading-relaxed text-dim">{children}</p>
+      <p className="max-w-[20rem] text-[0.8125rem] leading-relaxed text-dim">{children}</p>
     </div>
   )
 }

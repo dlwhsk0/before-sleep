@@ -98,7 +98,7 @@ export function HomeFeed({
 
       {past.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="px-1 text-sm text-dim">지난 밤</h2>
+          <h2 className="px-1 text-[0.8125rem] text-dim">지난 밤</h2>
           {past.map((record) => {
             const item = record.watchItemId ? byId.get(record.watchItemId) : undefined
             return (

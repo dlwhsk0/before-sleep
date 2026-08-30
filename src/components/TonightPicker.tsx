@@ -130,11 +130,11 @@ export function TonightPicker({
       />
       <div className="relative mx-auto flex max-h-[85vh] w-full max-w-md flex-col gap-4 rounded-t-2xl border-t border-line bg-surface p-5 pb-8">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-base text-ink">{editing ? '수정' : '오늘 밤 뭘 틀까'}</h2>
+          <h2 className="text-sm text-ink">{editing ? '수정' : '오늘 밤 뭘 틀까'}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-sm text-dim transition-colors hover:text-ink"
+            className="text-[0.8125rem] text-dim transition-colors hover:text-ink"
           >
             닫기
           </button>
@@ -147,12 +147,12 @@ export function TonightPicker({
                 src={preview.thumbnailUrl}
                 fallback={preview.host}
                 className="aspect-video w-full rounded-lg bg-surface-2 object-cover"
-                fallbackClassName="flex aspect-video w-full items-center justify-center rounded-lg bg-surface-2 text-xs text-faint"
+                fallbackClassName="flex aspect-video w-full items-center justify-center rounded-lg bg-surface-2 text-[0.6875rem] text-faint"
               />
-              <p className="truncate px-1 text-sm text-ink">
+              <p className="truncate px-1 text-[0.8125rem] text-ink">
                 {preview.title ?? '제목 없음'}
                 {previewDuration > 0 && (
-                  <span className="tnum ml-2 text-xs text-faint">
+                  <span className="tnum ml-2 text-[0.6875rem] text-faint">
                     {formatHM(previewDuration)}
                   </span>
                 )}
@@ -165,40 +165,40 @@ export function TonightPicker({
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="링크를 붙여넣거나 제목을 쓰세요"
-            className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink placeholder:text-faint"
+            className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-base text-ink placeholder:text-faint"
           />
 
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder={fetchedTitle ? `제목 (비워두면 "${fetchedTitle}")` : '제목 (선택)'}
-            className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink placeholder:text-faint"
+            className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-base text-ink placeholder:text-faint"
           />
 
           <div className="flex items-center gap-2">
-            <span className="text-sm text-dim">길이</span>
+            <span className="text-[0.8125rem] text-dim">길이</span>
             <input
               value={hours}
               onChange={(e) => setHours(e.target.value.replace(/\D/g, ''))}
               inputMode="numeric"
               placeholder="0"
               aria-label="러닝 타임 시간"
-              className="tnum w-12 rounded-lg border border-line bg-surface-2 px-2 py-2.5 text-center text-sm text-ink placeholder:text-faint"
+              className="tnum w-12 rounded-lg border border-line bg-surface-2 px-2 py-2.5 text-center text-base text-ink placeholder:text-faint"
             />
-            <span className="text-sm text-dim">시간</span>
+            <span className="text-[0.8125rem] text-dim">시간</span>
             <input
               value={minutes}
               onChange={(e) => setMinutes(e.target.value.replace(/\D/g, ''))}
               inputMode="numeric"
               placeholder="0"
               aria-label="러닝 타임 분"
-              className="tnum w-12 rounded-lg border border-line bg-surface-2 px-2 py-2.5 text-center text-sm text-ink placeholder:text-faint"
+              className="tnum w-12 rounded-lg border border-line bg-surface-2 px-2 py-2.5 text-center text-base text-ink placeholder:text-faint"
             />
-            <span className="text-sm text-dim">분</span>
+            <span className="text-[0.8125rem] text-dim">분</span>
             <button
               type="submit"
               disabled={!trimmed}
-              className="ml-auto shrink-0 rounded-lg bg-accent px-4 py-2.5 text-sm text-bg transition-opacity disabled:opacity-40"
+              className="ml-auto shrink-0 rounded-lg bg-accent px-4 py-2.5 text-[0.8125rem] text-bg transition-opacity disabled:opacity-40"
             >
               {editing ? '저장' : '추가'}
             </button>
@@ -208,7 +208,7 @@ export function TonightPicker({
             <button
               type="button"
               onClick={() => void onDelete(editing).then(onClose)}
-              className="self-start px-1 py-2 text-sm text-danger transition-opacity hover:opacity-70"
+              className="self-start px-1 py-2 text-[0.8125rem] text-danger transition-opacity hover:opacity-70"
             >
               삭제
             </button>
@@ -217,7 +217,7 @@ export function TonightPicker({
 
         <div className={`flex flex-col gap-2 overflow-y-auto ${editing ? 'hidden' : ''}`}>
           {waiting.length === 0 ? (
-            <p className="py-8 text-center text-sm text-faint">
+            <p className="py-8 text-center text-[0.8125rem] text-faint">
               대기 목록이 비어 있어요. 위에 하나 추가해 보세요.
             </p>
           ) : (
@@ -245,11 +245,11 @@ export function TonightPicker({
                       fallbackClassName="flex h-12 w-20 shrink-0 items-center justify-center rounded bg-surface-2 text-[0.625rem] text-faint"
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm text-ink">
+                      <span className="block truncate text-[0.8125rem] text-ink">
                         {parsed.label}
                       </span>
                       {item.durationMinutes && (
-                        <span className="tnum block text-xs text-faint">
+                        <span className="tnum block text-[0.6875rem] text-faint">
                           {formatHM(item.durationMinutes)}
                         </span>
                       )}
@@ -259,7 +259,7 @@ export function TonightPicker({
                     type="button"
                     onClick={() => onRemove(item.id)}
                     aria-label={`${parsed.label} 지우기`}
-                    className="shrink-0 px-1 text-xs text-faint transition-colors hover:text-danger"
+                    className="shrink-0 px-1 text-[0.6875rem] text-faint transition-colors hover:text-danger"
                   >
                     지우기
                   </button>

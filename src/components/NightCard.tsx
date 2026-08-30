@@ -63,7 +63,7 @@ export function NightCard({ record, item, today, onPick, onActions }: Props) {
       src={parsed?.thumbnailUrl}
       fallback={parsed?.host}
       className="aspect-video w-full rounded-lg bg-surface-2 object-cover"
-      fallbackClassName="flex aspect-video w-full items-center justify-center rounded-lg bg-surface-2 text-xs text-faint"
+      fallbackClassName="flex aspect-video w-full items-center justify-center rounded-lg bg-surface-2 text-[0.6875rem] text-faint"
     />
   )
 
@@ -101,18 +101,18 @@ export function NightCard({ record, item, today, onPick, onActions }: Props) {
       aria-label={onActions ? `${parsed?.title ?? '제목 없음'} — 수정` : undefined}
     >
       <div className="flex items-baseline justify-between gap-3 px-1">
-        <span className={`text-sm ${today ? 'text-ink' : 'text-dim'}`}>
+        <span className={`text-[0.8125rem] ${today ? 'text-ink' : 'text-dim'}`}>
           {today ? '오늘 밤' : formatDateKey(record.date)}
         </span>
         {record.sleepStart !== undefined ? (
-          <span className="tnum text-sm text-dim">
+          <span className="tnum text-[0.8125rem] text-dim">
             {formatClock(record.sleepStart)}
-            <span className="ml-1 font-[family-name:var(--font-sans)] text-xs text-faint">
+            <span className="ml-1 font-[family-name:var(--font-sans)] text-[0.6875rem] text-faint">
               틀었음
             </span>
           </span>
         ) : (
-          <span className="text-xs text-faint">틀은 시각 미기록</span>
+          <span className="text-[0.6875rem] text-faint">틀은 시각 미기록</span>
         )}
       </div>
 
@@ -136,11 +136,11 @@ export function NightCard({ record, item, today, onPick, onActions }: Props) {
 
       <div className="flex items-start justify-between gap-3 px-1 pb-1">
         <span className="flex min-w-0 flex-col gap-0.5">
-          <span className={`text-sm leading-snug ${parsed?.title ? 'text-ink' : 'text-faint'}`}>
+          <span className={`text-[0.8125rem] leading-snug ${parsed?.title ? 'text-ink' : 'text-faint'}`}>
             {parsed ? (parsed.title ?? '제목 없음') : '아직 안 정했어요'}
           </span>
           {item?.durationMinutes && (
-            <span className="tnum text-xs text-faint">
+            <span className="tnum text-[0.6875rem] text-faint">
               {formatHM(item.durationMinutes)}
             </span>
           )}
@@ -149,7 +149,7 @@ export function NightCard({ record, item, today, onPick, onActions }: Props) {
           <button
             type="button"
             onClick={onPick}
-            className="shrink-0 text-xs text-accent transition-opacity hover:opacity-70"
+            className="shrink-0 text-[0.6875rem] text-accent transition-opacity hover:opacity-70"
           >
             고르기
           </button>

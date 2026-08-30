@@ -88,7 +88,7 @@ export function RecordForm({
       className="flex flex-col gap-5 rounded-xl border border-line p-5"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-ink">
+        <h2 className="text-sm font-semibold text-ink">
           기록
         </h2>
         <input
@@ -96,13 +96,13 @@ export function RecordForm({
           value={date}
           max={todayKey()}
           onChange={(e) => setDate(e.target.value)}
-          className="rounded-lg border border-line px-2 py-1 text-sm outline-none focus:border-ink"
+          className="rounded-lg border border-line px-2 py-1 text-[0.8125rem] outline-none focus:border-ink"
         />
       </div>
 
       {/* 수면: 왼쪽 원형 다이얼 + 오른쪽 세부/소요 */}
       <div className="flex flex-col gap-3">
-        <span className="text-sm text-dim">수면</span>
+        <span className="text-[0.8125rem] text-dim">수면</span>
         <div className="flex items-center gap-4">
           <SleepClock
             start={sleepStart}
@@ -115,7 +115,7 @@ export function RecordForm({
 
           {/* 오른쪽: 취침/기상 세부 + 총 수면시간 + 소요 편집 */}
           <div className="flex min-w-0 flex-1 flex-col gap-3">
-            <div className="flex flex-col gap-1.5 text-sm">
+            <div className="flex flex-col gap-1.5 text-[0.8125rem]">
               <span className="flex items-center gap-1.5 text-dim">
                 <span
                   className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
@@ -141,12 +141,12 @@ export function RecordForm({
             {/* 소요 총 수면시간 + 직접 편집 (취침 고정, 기상 이동) */}
             <div className="flex flex-col gap-1.5">
               <div className="flex items-baseline gap-2">
-                <span className="text-sm text-dim">소요</span>
-                <span className="text-lg font-semibold text-ink">
+                <span className="text-[0.8125rem] text-dim">소요</span>
+                <span className="text-sm font-semibold text-ink">
                   {formatHM(dur)}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-sm">
+              <div className="flex items-center gap-1.5 text-[0.8125rem]">
                 <input
                   type="number"
                   min="0"
@@ -174,7 +174,7 @@ export function RecordForm({
 
       {/* 몸무게 (중앙 정렬 + 양옆 −/+ 스테퍼) */}
       <div className="flex flex-col gap-1">
-        <span className="text-sm text-dim">몸무게 (kg)</span>
+        <span className="text-[0.8125rem] text-dim">몸무게 (kg)</span>
         <div className="flex items-center justify-center gap-3">
           <button
             type="button"
@@ -192,7 +192,7 @@ export function RecordForm({
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             onBlur={normalizeWeight}
-            className="w-28 rounded-lg border border-line px-3 py-2 text-center text-lg outline-none focus:border-ink [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="w-28 rounded-lg border border-line px-3 py-2 text-center text-sm outline-none focus:border-ink [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
           <button
             type="button"
