@@ -24,7 +24,12 @@ export function useWatchlist() {
   }, [refresh])
 
   const add = useCallback(
-    async (text: string, note?: string, durationMinutes?: number) => {
+    async (
+      text: string,
+      note?: string,
+      durationMinutes?: number,
+      fetchedTitle?: string,
+    ) => {
       const item: WatchItem = {
         id: crypto.randomUUID(),
         text: text.trim(),
@@ -32,6 +37,7 @@ export function useWatchlist() {
       }
       if (note?.trim()) item.note = note.trim()
       if (durationMinutes && durationMinutes > 0) item.durationMinutes = durationMinutes
+      if (fetchedTitle?.trim()) item.fetchedTitle = fetchedTitle.trim()
       await putWatchItem(item)
       await refresh()
       return item

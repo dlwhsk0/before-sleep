@@ -34,9 +34,9 @@ export type ParsedWatchItem = {
   /** 화면에 보여줄 한 줄. note가 있으면 note, 없으면 text(URL이면 보기 좋게 줄임) */
   label: string
   /**
-   * 사용자가 직접 쓴 제목만. URL을 넣었으면 note, 제목을 썼으면 text.
-   * 제목을 안 쓰면 undefined — 카드에는 링크 대신 이 값을 쓰므로
-   * label(링크로 대체될 수 있음)과 구분해서 둔다.
+   * 카드에 쓸 제목. 직접 쓴 것(note/text)이 우선이고, 없으면 유튜브에서
+   * 자동으로 가져온 제목. 둘 다 없으면 undefined.
+   * 카드에는 링크 대신 이 값을 쓰므로 label(주소로 대체될 수 있음)과 구분해 둔다.
    */
   title?: string
 }
@@ -77,8 +77,12 @@ function shortenUrl(url: URL): string {
   return (host + path).replace(/\/$/, '')
 }
 
-/** text(+note)를 화면에 필요한 값들로 해석한다. */
-export function parseWatchItem(text: string, note?: string): ParsedWatchItem {
+/** text(+note+자동 제목)를 화면에 필요한 값들로 해석한다. */
+export function parseWatchItem(
+  text: string,
+  note?: string,
+  fetchedTitle?: string,
+): ParsedWatchItem {
   const trimmed = text.trim()
 
   let url: URL | undefined
@@ -101,7 +105,7 @@ export function parseWatchItem(text: string, note?: string): ParsedWatchItem {
     host: url.hostname.replace(/^www\./, ''),
     youtubeId,
     thumbnailUrl: youtubeId ? youtubeThumbnail(youtubeId) : undefined,
-    label: note?.trim() || shortenUrl(url),
-    title: note?.trim() || undefined,
+    label: note?.trim() || fetchedTitle?.trim() || shortenUrl(url),
+    title: note?.trim() || fetchedTitle?.trim() || undefined,
   }
 }

@@ -71,15 +71,31 @@ describe('parseWatchItem', () => {
     expect(parseWatchItem('  자기 전 라디오  ').label).toBe('자기 전 라디오')
   })
 
-  it('title은 사용자가 직접 쓴 것만 담는다 (카드에 링크를 쓰지 않으려고)', () => {
-    // URL만 넣으면 제목이 없다 → 카드는 '제목 없음'을 보여준다
-    expect(parseWatchItem('https://youtu.be/dQw4w9WgXcQ').title).toBeUndefined()
-    // note를 쓰면 그게 제목
+  it('title은 카드에 쓸 제목이다 (링크는 쓰지 않는다)', () => {
     expect(parseWatchItem('https://youtu.be/dQw4w9WgXcQ', '빗소리 10시간').title).toBe(
       '빗소리 10시간',
     )
     // URL이 아니면 쓴 것 자체가 제목
     expect(parseWatchItem('넷플릭스 다큐 3화').title).toBe('넷플릭스 다큐 3화')
+  })
+
+  it('직접 쓴 제목이 없으면 유튜브에서 받아온 제목을 쓴다', () => {
+    const p = parseWatchItem(
+      'https://youtu.be/dQw4w9WgXcQ',
+      undefined,
+      'lofi hip hop radio',
+    )
+    expect(p.title).toBe('lofi hip hop radio')
+    expect(p.label).toBe('lofi hip hop radio')
+  })
+
+  it('직접 쓴 제목이 자동으로 받은 것보다 우선한다', () => {
+    const p = parseWatchItem('https://youtu.be/dQw4w9WgXcQ', '내가 쓴 제목', '받아온 제목')
+    expect(p.title).toBe('내가 쓴 제목')
+  })
+
+  it('둘 다 없으면 title은 undefined (카드는 "제목 없음")', () => {
+    expect(parseWatchItem('https://youtu.be/dQw4w9WgXcQ').title).toBeUndefined()
   })
 
   it('label은 여전히 링크로 대체될 수 있다 (대기 목록에서는 주소가 단서가 된다)', () => {

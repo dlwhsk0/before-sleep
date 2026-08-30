@@ -3,8 +3,14 @@ export type WatchItem = {
   id: string
   /** 사용자가 직접 쓴 한 줄. URL이거나 그냥 제목. 여기서 나머지를 전부 파생한다. */
   text: string
-  /** 선택. text에 URL을 넣었을 때 붙이는 제목·메모 */
+  /** 선택. 사용자가 직접 쓴 제목 */
   note?: string
+  /**
+   * 선택. 유튜브에서 자동으로 가져온 영상 제목.
+   * note와 분리해 둔다 — 직접 쓴 것이 항상 우선이고, 자동으로 받은 값을
+   * 사용자가 쓴 것처럼 다루면 나중에 덮어쓸지 판단할 수 없다.
+   */
+  fetchedTitle?: string
   /** 선택. 분 단위 길이 */
   durationMinutes?: number
   addedAt: string // ISO 8601

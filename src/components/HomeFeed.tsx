@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import type { DailyRecord, WatchItem } from '../types'
 import { todayKey } from '../lib/date'
 import { nowMinutes } from '../lib/time'
-import { ActionSheet } from './ActionSheet'
 import { NightCard } from './NightCard'
 import { TonightPicker } from './TonightPicker'
 
@@ -14,17 +13,14 @@ type Props = {
     text: string,
     note?: string,
     durationMinutes?: number,
+    fetchedTitle?: string,
   ) => Promise<WatchItem>
   onUpdateItem: (item: WatchItem) => Promise<void>
-  onRemoveItem: (id: string) => void
+  onRemoveItem: (id: string) => Promise<void> | void
 }
 
 /** 열려 있는 시트. 한 번에 하나만 뜬다. */
-type Sheet =
-  | { kind: 'pick' }
-  | { kind: 'edit'; item: WatchItem }
-  | { kind: 'actions'; date: string; item: WatchItem }
-  | null
+type Sheet = { kind: 'pick' } | { kind: 'edit'; item: WatchItem } | null
 
 /**
  * 홈 = 밤마다 무엇을 틀었는지 쌓이는 카드 피드.
@@ -71,17 +67,20 @@ export function HomeFeed({
     })
   }
 
-  /** 그 밤에서 영상만 뗀다. 수면·체중 기록은 남긴다. */
-  const detach = async (date: string) => {
-    const record = records.find((r) => r.date === date)
-    if (!record) return
-    const next = { ...record }
-    delete next.watchItemId
-    await onSaveRecord(next)
+  /**
+   * 영상을 지운다. 대기 목록에서 빼고, 그것을 가리키던 밤에서도 떼어낸다.
+   * 참조만 남으면 카드가 빈 껍데기가 되므로 같이 정리한다.
+   * 수면·체중 기록은 건드리지 않는다.
+   */
+  const deleteItem = async (item: WatchItem) => {
+    for (const record of records) {
+      if (record.watchItemId !== item.id) continue
+      const next = { ...record }
+      delete next.watchItemId
+      await onSaveRecord(next)
+    }
+    await onRemoveItem(item.id)
   }
-
-  const openActions = (date: string, item: WatchItem) =>
-    setSheet({ kind: 'actions', date, item })
 
   return (
     <div className="flex flex-col gap-6">
@@ -92,7 +91,7 @@ export function HomeFeed({
         onPick={todayRecord.watchItemId ? undefined : () => setSheet({ kind: 'pick' })}
         onActions={
           todayRecord.watchItemId && byId.get(todayRecord.watchItemId)
-            ? () => openActions(today, byId.get(todayRecord.watchItemId!)!)
+            ? () => setSheet({ kind: 'edit', item: byId.get(todayRecord.watchItemId!)! })
             : undefined
         }
       />
@@ -107,35 +106,20 @@ export function HomeFeed({
                 key={record.date}
                 record={record}
                 item={item}
-                onActions={item ? () => openActions(record.date, item) : undefined}
+                onActions={item ? () => setSheet({ kind: 'edit', item }) : undefined}
               />
             )
           })}
         </section>
       )}
 
-      {sheet?.kind === 'actions' && (
-        <ActionSheet
-          title={sheet.item.note?.trim() || sheet.item.text}
-          onClose={() => setSheet(null)}
-          actions={[
-            { label: '고치기', onSelect: () => setSheet({ kind: 'edit', item: sheet.item }) },
-            { label: '다른 걸로 바꾸기', onSelect: () => setSheet({ kind: 'pick' }) },
-            {
-              label: '이 밤에서 빼기',
-              danger: true,
-              onSelect: () => void detach(sheet.date),
-            },
-          ]}
-        />
-      )}
-
-      {(sheet?.kind === 'pick' || sheet?.kind === 'edit') && (
+      {sheet && (
         <TonightPicker
           items={items}
           selectedId={todayRecord.watchItemId}
           editing={sheet.kind === 'edit' ? sheet.item : undefined}
           onUpdate={onUpdateItem}
+          onDelete={deleteItem}
           onAdd={onAddItem}
           onSelect={pick}
           onRemove={onRemoveItem}

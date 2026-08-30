@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { WatchItem } from '../types'
 import { parseWatchItem } from '../lib/watchItem'
+import { fetchYoutubeTitle } from '../lib/youtubeTitle'
 import { formatHM } from '../lib/time'
 import { Thumbnail } from './Thumbnail'
 
@@ -10,23 +11,32 @@ type Props = {
   /** 넘어오면 목록 없이 이 항목을 고치는 화면이 된다 */
   editing?: WatchItem
   onUpdate?: (item: WatchItem) => Promise<void>
-  onAdd: (text: string, note?: string, durationMinutes?: number) => Promise<WatchItem>
+  onDelete?: (item: WatchItem) => Promise<void>
+  onAdd: (
+    text: string,
+    note?: string,
+    durationMinutes?: number,
+    fetchedTitle?: string,
+  ) => Promise<WatchItem>
   onSelect: (id: string) => void
   onRemove: (id: string) => void
   onClose: () => void
 }
 
 /**
- * "오늘 밤 뭘 틀지" 고르는 시트.
+ * 영상 한 줄을 넣거나 고치는 시트.
  *
- * 대기 목록을 홈에 상시로 깔지 않고 여기 담는다. 홈은 카드 피드만 보이게 두고,
- * 대기 목록은 고를 때만 필요하기 때문.
+ * 추가할 때와 고칠 때가 **같은 화면**이다. 고치기가 처음 입력하던 모습과
+ * 다르면 다시 배워야 하므로.
+ *
+ * 대기 목록은 홈에 상시로 깔지 않고 여기 담는다. 고칠 때는 목록을 숨긴다.
  */
 export function TonightPicker({
   items,
   selectedId,
   editing,
   onUpdate,
+  onDelete,
   onAdd,
   onSelect,
   onRemove,
@@ -34,13 +44,15 @@ export function TonightPicker({
 }: Props) {
   const [text, setText] = useState(editing?.text ?? '')
   const [note, setNote] = useState(editing?.note ?? '')
-  // 러닝 타임은 자동으로 알 수 없다(유튜브 oEmbed가 길이를 주지 않음). 직접 넣는다.
+  // 러닝 타임은 자동으로 알 수 없다(oEmbed가 길이를 주지 않음). 직접 넣는다.
   const [hours, setHours] = useState(
     editing?.durationMinutes ? String(Math.floor(editing.durationMinutes / 60)) : '',
   )
   const [minutes, setMinutes] = useState(
     editing?.durationMinutes ? String(editing.durationMinutes % 60) : '',
   )
+  // 유튜브에서 자동으로 받아온 제목. 직접 쓴 제목이 없을 때만 쓰인다.
+  const [fetchedTitle, setFetchedTitle] = useState(editing?.fetchedTitle ?? '')
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -52,36 +64,61 @@ export function TonightPicker({
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  const trimmed = text.trim()
+  const parsedNow = trimmed ? parseWatchItem(trimmed) : null
+  const youtubeId = parsedNow?.youtubeId
+
+  // 유튜브 링크를 넣으면 제목을 대신 받아온다. 입력이 멎은 뒤에 한 번만 부른다.
+  useEffect(() => {
+    if (!youtubeId || !parsedNow?.url) {
+      setFetchedTitle('')
+      return
+    }
+    let cancelled = false
+    const url = parsedNow.url
+    const id = setTimeout(() => {
+      void fetchYoutubeTitle(url).then((t) => {
+        if (!cancelled) setFetchedTitle(t ?? '')
+      })
+    }, 400)
+    return () => {
+      cancelled = true
+      clearTimeout(id)
+    }
+    // parsedNow는 text에서 파생되므로 유튜브 ID만 의존성으로 둔다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [youtubeId])
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!text.trim()) return
+    if (!trimmed) return
     const total = (Number(hours) || 0) * 60 + (Number(minutes) || 0)
 
     if (editing && onUpdate) {
-      const next: WatchItem = { ...editing, text: text.trim() }
+      const next: WatchItem = { ...editing, text: trimmed }
       if (note.trim()) next.note = note.trim()
       else delete next.note
       if (total > 0) next.durationMinutes = total
       else delete next.durationMinutes
+      if (fetchedTitle.trim()) next.fetchedTitle = fetchedTitle.trim()
+      else delete next.fetchedTitle
       await onUpdate(next)
       onClose()
       return
     }
 
-    const item = await onAdd(text, note, total || undefined)
+    const item = await onAdd(trimmed, note, total || undefined, fetchedTitle)
     setText('')
     setNote('')
     setHours('')
     setMinutes('')
+    setFetchedTitle('')
     onSelect(item.id)
   }
 
-  const waiting = items.filter((i) => !i.archived)
-
-  // 입력한 한 줄을 그대로 해석해 미리 보여준다. 저장 전에 "이 링크가 맞나"를
-  // 확인할 수 있어야 해서. 파싱은 순수 함수라 네트워크 호출이 없다.
-  const preview = text.trim() ? parseWatchItem(text, note) : null
+  const preview = trimmed ? parseWatchItem(trimmed, note, fetchedTitle) : null
   const previewDuration = (Number(hours) || 0) * 60 + (Number(minutes) || 0)
+  const waiting = items.filter((i) => !i.archived)
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col justify-end">
@@ -93,7 +130,7 @@ export function TonightPicker({
       />
       <div className="relative mx-auto flex max-h-[85vh] w-full max-w-md flex-col gap-4 rounded-t-2xl border-t border-line bg-surface p-5 pb-8">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-base text-ink">{editing ? '고치기' : '오늘 밤 뭘 틀까'}</h2>
+          <h2 className="text-base text-ink">{editing ? '수정' : '오늘 밤 뭘 틀까'}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -113,7 +150,7 @@ export function TonightPicker({
                 fallbackClassName="flex aspect-video w-full items-center justify-center rounded-lg bg-surface-2 text-xs text-faint"
               />
               <p className="truncate px-1 text-sm text-ink">
-                {preview.label}
+                {preview.title ?? '제목 없음'}
                 {previewDuration > 0 && (
                   <span className="tnum ml-2 text-xs text-faint">
                     {formatHM(previewDuration)}
@@ -130,10 +167,11 @@ export function TonightPicker({
             placeholder="링크를 붙여넣거나 제목을 쓰세요"
             className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink placeholder:text-faint"
           />
+
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="제목 (링크를 넣었을 때만, 선택)"
+            placeholder={fetchedTitle ? `제목 (비워두면 "${fetchedTitle}")` : '제목 (선택)'}
             className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink placeholder:text-faint"
           />
 
@@ -159,12 +197,22 @@ export function TonightPicker({
             <span className="text-sm text-dim">분</span>
             <button
               type="submit"
-              disabled={!text.trim()}
+              disabled={!trimmed}
               className="ml-auto shrink-0 rounded-lg bg-accent px-4 py-2.5 text-sm text-bg transition-opacity disabled:opacity-40"
             >
               {editing ? '저장' : '추가'}
             </button>
           </div>
+
+          {editing && onDelete && (
+            <button
+              type="button"
+              onClick={() => void onDelete(editing).then(onClose)}
+              className="self-start px-1 py-2 text-sm text-danger transition-opacity hover:opacity-70"
+            >
+              삭제
+            </button>
+          )}
         </form>
 
         <div className={`flex flex-col gap-2 overflow-y-auto ${editing ? 'hidden' : ''}`}>
@@ -174,7 +222,7 @@ export function TonightPicker({
             </p>
           ) : (
             waiting.map((item) => {
-              const parsed = parseWatchItem(item.text, item.note)
+              const parsed = parseWatchItem(item.text, item.note, item.fetchedTitle)
               const selected = item.id === selectedId
               return (
                 <div key={item.id} className="flex items-center gap-3">

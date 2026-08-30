@@ -39,7 +39,7 @@ type Props = {
  * (데스크톱에서는 우클릭, 키보드에서는 포커스 후 Enter)로 메뉴를 연다.
  */
 export function NightCard({ record, item, today, onPick, onActions }: Props) {
-  const parsed = item ? parseWatchItem(item.text, item.note) : null
+  const parsed = item ? parseWatchItem(item.text, item.note, item.fetchedTitle) : null
   const timer = useRef<number | null>(null)
 
   const clear = () => {
@@ -98,7 +98,7 @@ export function NightCard({ record, item, today, onPick, onActions }: Props) {
             }
           : undefined
       }
-      aria-label={onActions ? `${parsed?.title ?? '제목 없음'} — 수정하거나 삭제` : undefined}
+      aria-label={onActions ? `${parsed?.title ?? '제목 없음'} — 수정` : undefined}
     >
       <div className="flex items-baseline justify-between gap-3 px-1">
         <span className={`text-sm ${today ? 'text-ink' : 'text-dim'}`}>
