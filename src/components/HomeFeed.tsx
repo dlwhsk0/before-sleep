@@ -8,7 +8,7 @@ type Props = {
   records: DailyRecord[]
   items: WatchItem[]
   onSaveRecord: (record: DailyRecord) => Promise<void>
-  onAddItem: (text: string, note?: string) => Promise<WatchItem>
+  onAddItem: (text: string, note?: string, durationMinutes?: number) => Promise<WatchItem>
   onRemoveItem: (id: string) => void
 }
 

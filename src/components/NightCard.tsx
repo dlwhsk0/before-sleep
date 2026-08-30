@@ -1,6 +1,6 @@
 import type { DailyRecord, WatchItem } from '../types'
 import { parseWatchItem } from '../lib/watchItem'
-import { formatClock } from '../lib/time'
+import { formatClock, formatHM } from '../lib/time'
 import { Thumbnail } from './Thumbnail'
 
 const dateFormat = new Intl.DateTimeFormat('ko-KR', {
@@ -76,9 +76,16 @@ export function NightCard({ record, item, today, onPick }: Props) {
       )}
 
       <div className="flex items-start justify-between gap-3 px-1 pb-1">
-        <p className="text-sm leading-snug text-ink">
-          {parsed ? parsed.label : '아직 안 정했어요'}
-        </p>
+        <span className="flex min-w-0 flex-col gap-0.5">
+          <span className="text-sm leading-snug text-ink">
+            {parsed ? parsed.label : '아직 안 정했어요'}
+          </span>
+          {item?.durationMinutes && (
+            <span className="tnum text-xs text-faint">
+              {formatHM(item.durationMinutes)}
+            </span>
+          )}
+        </span>
         {onPick && (
           <button
             type="button"

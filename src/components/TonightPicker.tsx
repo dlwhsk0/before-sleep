@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import type { WatchItem } from '../types'
 import { parseWatchItem } from '../lib/watchItem'
+import { formatHM } from '../lib/time'
 import { Thumbnail } from './Thumbnail'
 
 type Props = {
   items: WatchItem[]
   selectedId?: string
-  onAdd: (text: string, note?: string) => Promise<WatchItem>
+  onAdd: (text: string, note?: string, durationMinutes?: number) => Promise<WatchItem>
   onSelect: (id: string) => void
   onRemove: (id: string) => void
   onClose: () => void
@@ -28,6 +29,9 @@ export function TonightPicker({
 }: Props) {
   const [text, setText] = useState('')
   const [note, setNote] = useState('')
+  // 러닝 타임은 자동으로 알 수 없다(유튜브 oEmbed가 길이를 주지 않음). 직접 넣는다.
+  const [hours, setHours] = useState('')
+  const [minutes, setMinutes] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -42,9 +46,12 @@ export function TonightPicker({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!text.trim()) return
-    const item = await onAdd(text, note)
+    const total = (Number(hours) || 0) * 60 + (Number(minutes) || 0)
+    const item = await onAdd(text, note, total || undefined)
     setText('')
     setNote('')
+    setHours('')
+    setMinutes('')
     onSelect(item.id)
   }
 
@@ -53,6 +60,7 @@ export function TonightPicker({
   // 입력한 한 줄을 그대로 해석해 미리 보여준다. 저장 전에 "이 링크가 맞나"를
   // 확인할 수 있어야 해서. 파싱은 순수 함수라 네트워크 호출이 없다.
   const preview = text.trim() ? parseWatchItem(text, note) : null
+  const previewDuration = (Number(hours) || 0) * 60 + (Number(minutes) || 0)
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col justify-end">
@@ -83,7 +91,14 @@ export function TonightPicker({
                 className="aspect-video w-full rounded-lg bg-surface-2 object-cover"
                 fallbackClassName="flex aspect-video w-full items-center justify-center rounded-lg bg-surface-2 text-xs text-faint"
               />
-              <p className="truncate px-1 text-sm text-ink">{preview.label}</p>
+              <p className="truncate px-1 text-sm text-ink">
+                {preview.label}
+                {previewDuration > 0 && (
+                  <span className="tnum ml-2 text-xs text-faint">
+                    {formatHM(previewDuration)}
+                  </span>
+                )}
+              </p>
             </div>
           )}
 
@@ -94,17 +109,37 @@ export function TonightPicker({
             placeholder="링크를 붙여넣거나 제목을 쓰세요"
             className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink placeholder:text-faint"
           />
-          <div className="flex gap-2">
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="제목 (링크를 넣었을 때만, 선택)"
+            className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink placeholder:text-faint"
+          />
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-dim">길이</span>
             <input
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="제목 (링크를 넣었을 때만, 선택)"
-              className="min-w-0 flex-1 rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink placeholder:text-faint"
+              value={hours}
+              onChange={(e) => setHours(e.target.value.replace(/\D/g, ''))}
+              inputMode="numeric"
+              placeholder="0"
+              aria-label="러닝 타임 시간"
+              className="tnum w-12 rounded-lg border border-line bg-surface-2 px-2 py-2.5 text-center text-sm text-ink placeholder:text-faint"
             />
+            <span className="text-sm text-dim">시간</span>
+            <input
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value.replace(/\D/g, ''))}
+              inputMode="numeric"
+              placeholder="0"
+              aria-label="러닝 타임 분"
+              className="tnum w-12 rounded-lg border border-line bg-surface-2 px-2 py-2.5 text-center text-sm text-ink placeholder:text-faint"
+            />
+            <span className="text-sm text-dim">분</span>
             <button
               type="submit"
               disabled={!text.trim()}
-              className="shrink-0 rounded-lg bg-accent px-4 py-2.5 text-sm text-bg transition-opacity disabled:opacity-40"
+              className="ml-auto shrink-0 rounded-lg bg-accent px-4 py-2.5 text-sm text-bg transition-opacity disabled:opacity-40"
             >
               추가
             </button>
@@ -146,8 +181,7 @@ export function TonightPicker({
                       </span>
                       {item.durationMinutes && (
                         <span className="tnum block text-xs text-faint">
-                          {Math.floor(item.durationMinutes / 60)}시간{' '}
-                          {item.durationMinutes % 60}분
+                          {formatHM(item.durationMinutes)}
                         </span>
                       )}
                     </span>
