@@ -12,6 +12,8 @@
 
 import { MINUTES_IN_DAY, durationMinutes } from './time'
 
+export { minutesOfDay } from './time'
+
 /** 어두워지기 시작하는 시각 (21:00). */
 export const DIM_START = 21 * 60
 /** 최대치에 닿는 시각 (03:00). */
@@ -38,7 +40,3 @@ export function nightDimOpacity(minutesOfDay: number): number {
   return Number(((elapsed / RAMP) * MAX_DIM).toFixed(4))
 }
 
-/** Date → 자정 기준 분. */
-export function minutesOfDay(d: Date): number {
-  return d.getHours() * 60 + d.getMinutes()
-}

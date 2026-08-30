@@ -71,6 +71,23 @@ describe('parseWatchItem', () => {
     expect(parseWatchItem('  자기 전 라디오  ').label).toBe('자기 전 라디오')
   })
 
+  it('title은 사용자가 직접 쓴 것만 담는다 (카드에 링크를 쓰지 않으려고)', () => {
+    // URL만 넣으면 제목이 없다 → 카드는 '제목 없음'을 보여준다
+    expect(parseWatchItem('https://youtu.be/dQw4w9WgXcQ').title).toBeUndefined()
+    // note를 쓰면 그게 제목
+    expect(parseWatchItem('https://youtu.be/dQw4w9WgXcQ', '빗소리 10시간').title).toBe(
+      '빗소리 10시간',
+    )
+    // URL이 아니면 쓴 것 자체가 제목
+    expect(parseWatchItem('넷플릭스 다큐 3화').title).toBe('넷플릭스 다큐 3화')
+  })
+
+  it('label은 여전히 링크로 대체될 수 있다 (대기 목록에서는 주소가 단서가 된다)', () => {
+    expect(parseWatchItem('https://youtu.be/dQw4w9WgXcQ').label).toBe(
+      'youtu.be/dQw4w9WgXcQ',
+    )
+  })
+
   it('깨진 URL은 제목으로 떨어진다', () => {
     const p = parseWatchItem('https://')
     expect(p.isUrl).toBe(false)

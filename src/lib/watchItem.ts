@@ -33,6 +33,12 @@ export type ParsedWatchItem = {
   thumbnailUrl?: string
   /** 화면에 보여줄 한 줄. note가 있으면 note, 없으면 text(URL이면 보기 좋게 줄임) */
   label: string
+  /**
+   * 사용자가 직접 쓴 제목만. URL을 넣었으면 note, 제목을 썼으면 text.
+   * 제목을 안 쓰면 undefined — 카드에는 링크 대신 이 값을 쓰므로
+   * label(링크로 대체될 수 있음)과 구분해서 둔다.
+   */
+  title?: string
 }
 
 /** URL 문자열에서 유튜브 영상 ID를 뽑는다. 유튜브가 아니거나 못 찾으면 undefined. */
@@ -85,7 +91,7 @@ export function parseWatchItem(text: string, note?: string): ParsedWatchItem {
   }
 
   if (!url) {
-    return { isUrl: false, label: note?.trim() || trimmed }
+    return { isUrl: false, label: note?.trim() || trimmed, title: trimmed }
   }
 
   const youtubeId = youtubeIdFrom(url)
@@ -96,5 +102,6 @@ export function parseWatchItem(text: string, note?: string): ParsedWatchItem {
     youtubeId,
     thumbnailUrl: youtubeId ? youtubeThumbnail(youtubeId) : undefined,
     label: note?.trim() || shortenUrl(url),
+    title: note?.trim() || undefined,
   }
 }

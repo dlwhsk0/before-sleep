@@ -40,3 +40,13 @@ export function formatHM(totalMin: number): string {
   if (m === 0) return `${h}시간`
   return `${h}시간 ${m}분`
 }
+
+/** Date → 자정 기준 분(0–1439). */
+export function minutesOfDay(d: Date): number {
+  return d.getHours() * 60 + d.getMinutes()
+}
+
+/** 지금 시각의 자정 기준 분. */
+export function nowMinutes(): number {
+  return minutesOfDay(new Date())
+}

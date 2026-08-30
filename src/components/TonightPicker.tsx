@@ -7,6 +7,9 @@ import { Thumbnail } from './Thumbnail'
 type Props = {
   items: WatchItem[]
   selectedId?: string
+  /** 넘어오면 목록 없이 이 항목을 고치는 화면이 된다 */
+  editing?: WatchItem
+  onUpdate?: (item: WatchItem) => Promise<void>
   onAdd: (text: string, note?: string, durationMinutes?: number) => Promise<WatchItem>
   onSelect: (id: string) => void
   onRemove: (id: string) => void
@@ -22,16 +25,22 @@ type Props = {
 export function TonightPicker({
   items,
   selectedId,
+  editing,
+  onUpdate,
   onAdd,
   onSelect,
   onRemove,
   onClose,
 }: Props) {
-  const [text, setText] = useState('')
-  const [note, setNote] = useState('')
+  const [text, setText] = useState(editing?.text ?? '')
+  const [note, setNote] = useState(editing?.note ?? '')
   // 러닝 타임은 자동으로 알 수 없다(유튜브 oEmbed가 길이를 주지 않음). 직접 넣는다.
-  const [hours, setHours] = useState('')
-  const [minutes, setMinutes] = useState('')
+  const [hours, setHours] = useState(
+    editing?.durationMinutes ? String(Math.floor(editing.durationMinutes / 60)) : '',
+  )
+  const [minutes, setMinutes] = useState(
+    editing?.durationMinutes ? String(editing.durationMinutes % 60) : '',
+  )
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -47,6 +56,18 @@ export function TonightPicker({
     e.preventDefault()
     if (!text.trim()) return
     const total = (Number(hours) || 0) * 60 + (Number(minutes) || 0)
+
+    if (editing && onUpdate) {
+      const next: WatchItem = { ...editing, text: text.trim() }
+      if (note.trim()) next.note = note.trim()
+      else delete next.note
+      if (total > 0) next.durationMinutes = total
+      else delete next.durationMinutes
+      await onUpdate(next)
+      onClose()
+      return
+    }
+
     const item = await onAdd(text, note, total || undefined)
     setText('')
     setNote('')
@@ -72,7 +93,7 @@ export function TonightPicker({
       />
       <div className="relative mx-auto flex max-h-[85vh] w-full max-w-md flex-col gap-4 rounded-t-2xl border-t border-line bg-surface p-5 pb-8">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-base text-ink">오늘 밤 뭘 틀까</h2>
+          <h2 className="text-base text-ink">{editing ? '고치기' : '오늘 밤 뭘 틀까'}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -141,12 +162,12 @@ export function TonightPicker({
               disabled={!text.trim()}
               className="ml-auto shrink-0 rounded-lg bg-accent px-4 py-2.5 text-sm text-bg transition-opacity disabled:opacity-40"
             >
-              추가
+              {editing ? '저장' : '추가'}
             </button>
           </div>
         </form>
 
-        <div className="flex flex-col gap-2 overflow-y-auto">
+        <div className={`flex flex-col gap-2 overflow-y-auto ${editing ? 'hidden' : ''}`}>
           {waiting.length === 0 ? (
             <p className="py-8 text-center text-sm text-faint">
               대기 목록이 비어 있어요. 위에 하나 추가해 보세요.

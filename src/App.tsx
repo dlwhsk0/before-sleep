@@ -52,7 +52,13 @@ function App() {
     remove,
     refresh: refreshRecords,
   } = useRecords()
-  const { items, add: addItem, remove: removeItem, refresh: refreshItems } = useWatchlist()
+  const {
+    items,
+    add: addItem,
+    update: updateItem,
+    remove: removeItem,
+    refresh: refreshItems,
+  } = useWatchlist()
   const { memos, add: addMemo, remove: removeMemo, refresh: refreshMemos } = useMemos()
   const { settings, update } = useSettings()
   const [tab, setTab] = useState<TabId>('home')
@@ -84,6 +90,7 @@ function App() {
                 items={items}
                 onSaveRecord={save}
                 onAddItem={addItem}
+                onUpdateItem={updateItem}
                 onRemoveItem={removeItem}
               />
             ))}
