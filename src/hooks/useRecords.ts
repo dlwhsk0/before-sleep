@@ -13,11 +13,19 @@ import {
 export function useRecords() {
   const [records, setRecords] = useState<DailyRecord[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
-    const all = await getAllRecords()
-    setRecords(all)
-    setLoading(false)
+    try {
+      setRecords(await getAllRecords())
+      setError(null)
+    } catch (e) {
+      // 사생활 보호 모드나 저장소 차단이면 여기로 온다. 조용히 멈추면
+      // 화면이 '불러오는 중'에 영원히 갇히므로 상태로 올린다.
+      setError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => {
@@ -40,5 +48,5 @@ export function useRecords() {
     [refresh],
   )
 
-  return { records, loading, save, remove }
+  return { records, loading, error, save, remove, refresh }
 }

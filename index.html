@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- 브라우저 UI도 앱 배경에 맞춘다 (다크가 기본) -->
-    <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#f4f6fa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#101a2f" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f2f5fb" media="(prefers-color-scheme: light)" />
 
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -20,8 +20,10 @@
       // 키는 src/lib/settings.ts의 STORAGE_KEY와 같아야 한다.
       try {
         var s = JSON.parse(localStorage.getItem('before-sleep:settings') || '{}')
-        if (s.theme === 'light' || s.theme === 'dark') {
-          document.documentElement.setAttribute('data-theme', s.theme)
+        // 저장된 값이 없으면 다크. src/lib/settings.ts의 DEFAULT_SETTINGS와 같아야 한다.
+        var t = s.theme || 'dark'
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t)
         }
       } catch (e) {}
     </script>

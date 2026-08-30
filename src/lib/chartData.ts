@@ -53,9 +53,9 @@ export function toChartRows(stats: RecordStats[]): ChartRow[] {
     return {
       date,
       label: shortDateLabel(date),
-      weightKg: s ? s.weightKg : null,
-      sleepHours: s ? minutesToHours(s.sleepMinutes) : null,
-      weightFromStart: s ? s.weightDeltaFromStart : null,
+      weightKg: s?.weightKg ?? null,
+      sleepHours: s && s.sleepMinutes !== null ? minutesToHours(s.sleepMinutes) : null,
+      weightFromStart: s?.weightDeltaFromStart ?? null,
     }
   })
 }

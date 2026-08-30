@@ -29,9 +29,10 @@ export function RecordForm({
   // 날짜가 바뀌거나 기록이 갱신되면 해당 날짜의 값을 폼에 채운다.
   useEffect(() => {
     if (existing) {
-      setSleepStart(existing.sleepStart)
-      setSleepEnd(existing.sleepEnd)
-      setWeight(existing.weightKg.toFixed(1))
+      setSleepStart(existing.sleepStart ?? DEFAULT_START)
+      setSleepEnd(existing.sleepEnd ?? DEFAULT_END)
+      // 체중은 없을 수도 있다(선택 기능). 없으면 현재 입력값을 그대로 둔다.
+      if (existing.weightKg !== undefined) setWeight(existing.weightKg.toFixed(1))
     } else {
       setSleepStart(DEFAULT_START)
       setSleepEnd(DEFAULT_END)

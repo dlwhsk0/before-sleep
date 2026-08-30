@@ -9,6 +9,11 @@ export function round1(n: number): number {
   return Math.round(n * 10) / 10
 }
 
+/** 수면이 온전히 기록된 레코드인지. */
+function hasSleep(r: DailyRecord): r is DailyRecord & { sleepStart: number; sleepEnd: number } {
+  return r.sleepStart !== undefined && r.sleepEnd !== undefined
+}
+
 /**
  * 기록 목록으로부터 통계(전일 대비 / 첫날 대비 증감)를 계산한다.
  *
@@ -16,26 +21,45 @@ export function round1(n: number): number {
  * 입력 순서와 무관하도록 내부에서 날짜 오름차순으로 정렬한다.
  *
  * 규칙:
- * - 수면 소요 = 취침~기상(자정 넘김 포함), 전일 대비는 "직전 기록일"의 소요와 비교(분)
- * - 몸무게 전일 대비 = 직전 기록일 기준
- * - 몸무게 첫날 대비 = 가장 오래된 기록 기준
- * - 비교 대상이 없는 첫 기록은 모든 증감이 null
+ * - 전일 대비는 달력상 전날이 아니라 **직전에 그 값이 기록된 날**과 비교한다.
+ *   수면과 체중은 서로 다른 날 비어 있을 수 있으므로 각각 따로 추적한다.
+ * - 체중 첫날 대비 = 체중이 기록된 가장 오래된 날 기준
+ * - 비교 대상이 없으면(첫 기록) 증감은 null
  */
 export function computeStats(records: DailyRecord[]): RecordStats[] {
   const sorted = [...records].sort((a, b) => a.date.localeCompare(b.date))
-  const first = sorted[0]
 
-  return sorted.map((record, i) => {
-    const prev = i > 0 ? sorted[i - 1] : null
-    const sleepMinutes = durationMinutes(record.sleepStart, record.sleepEnd)
+  const firstWeight = sorted.find((r) => r.weightKg !== undefined)?.weightKg
+
+  let prevSleepMinutes: number | null = null
+  let prevWeight: number | null = null
+
+  return sorted.map((record) => {
+    const sleepMinutes = hasSleep(record)
+      ? durationMinutes(record.sleepStart, record.sleepEnd)
+      : null
+    const weight = record.weightKg
+
+    const sleepDeltaMinutes =
+      sleepMinutes !== null && prevSleepMinutes !== null
+        ? sleepMinutes - prevSleepMinutes
+        : null
+    const weightDelta =
+      weight !== undefined && prevWeight !== null ? round1(weight - prevWeight) : null
+    const weightDeltaFromStart =
+      weight !== undefined && firstWeight !== undefined && weight !== firstWeight
+        ? round1(weight - firstWeight)
+        : null
+
+    if (sleepMinutes !== null) prevSleepMinutes = sleepMinutes
+    if (weight !== undefined) prevWeight = weight
+
     return {
       ...record,
       sleepMinutes,
-      sleepDeltaMinutes: prev
-        ? sleepMinutes - durationMinutes(prev.sleepStart, prev.sleepEnd)
-        : null,
-      weightDelta: prev ? round1(record.weightKg - prev.weightKg) : null,
-      weightDeltaFromStart: prev ? round1(record.weightKg - first.weightKg) : null,
+      sleepDeltaMinutes,
+      weightDelta,
+      weightDeltaFromStart,
     }
   })
 }

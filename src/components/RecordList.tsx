@@ -73,7 +73,7 @@ function WeightRow({ row }: { row: RecordStats }) {
         <span className="flex items-baseline gap-2">
           {peek ? (
             <span className="text-base font-medium text-ink">
-              {kg(row.weightKg)}
+              {row.weightKg === undefined ? '—' : kg(row.weightKg)}
             </span>
           ) : (
             <span className="text-xs text-faint">눌러서 보기</span>
@@ -134,20 +134,23 @@ export function RecordList({
           </div>
 
           <div className="flex flex-col gap-1 text-sm">
-            <div className="flex items-baseline justify-between">
-              <span className="text-dim">수면</span>
-              <span className="flex items-baseline gap-2">
-                <span className="text-base font-medium text-ink">
-                  {formatClock(row.sleepStart)} → {formatClock(row.sleepEnd)}
-                </span>
-                <span className="text-dim">
-                  · {formatHM(row.sleepMinutes)}
-                </span>
-                <DeltaBadge value={row.sleepDeltaMinutes} format={formatHM} />
-              </span>
-            </div>
+            {/* 수면·체중은 각각 없을 수 있다. 없는 값은 줄째로 건너뛴다. */}
+            {row.sleepStart !== undefined &&
+              row.sleepEnd !== undefined &&
+              row.sleepMinutes !== null && (
+                <div className="flex items-baseline justify-between">
+                  <span className="text-dim">수면</span>
+                  <span className="flex items-baseline gap-2">
+                    <span className="text-base font-medium text-ink">
+                      {formatClock(row.sleepStart)} → {formatClock(row.sleepEnd)}
+                    </span>
+                    <span className="text-dim">· {formatHM(row.sleepMinutes)}</span>
+                    <DeltaBadge value={row.sleepDeltaMinutes} format={formatHM} />
+                  </span>
+                </div>
+              )}
 
-            <WeightRow row={row} />
+            {row.weightKg !== undefined && <WeightRow row={row} />}
           </div>
         </li>
       ))}

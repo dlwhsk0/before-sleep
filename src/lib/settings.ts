@@ -22,7 +22,9 @@ export type Settings = {
 export const STORAGE_KEY = 'before-sleep:settings'
 
 export const DEFAULT_SETTINGS: Settings = {
-  theme: 'system',
+  // 시스템 설정을 따르지 않고 다크로 시작한다. 불 끈 방에서 쓰는 앱이라
+  // 라이트가 기본이면 첫인상이 설계 의도와 어긋난다. 설정에서 바꿀 수 있다.
+  theme: 'dark',
   trackWeight: true,
   dimAtNight: true,
 }
@@ -52,4 +54,9 @@ export function applyTheme(theme: ThemePref): void {
   const root = document.documentElement
   if (theme === 'system') root.removeAttribute('data-theme')
   else root.setAttribute('data-theme', theme)
+}
+
+/** 첫 페인트 전 인라인 스크립트와 같은 규칙. 저장값이 없으면 기본값(다크). */
+export function initialTheme(): ThemePref {
+  return loadSettings().theme
 }

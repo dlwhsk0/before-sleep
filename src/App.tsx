@@ -1,12 +1,16 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useCallback, useState } from 'react'
+import { useMemos } from './hooks/useMemos'
 import { useRecords } from './hooks/useRecords'
 import { useSettings } from './hooks/useSettings'
+import { useWatchlist } from './hooks/useWatchlist'
 import { computeStats } from './lib/stats'
 import { AppHeader } from './components/AppHeader'
-import { ComingSoon } from './components/ComingSoon'
+import { HomeFeed } from './components/HomeFeed'
+import { MemoBoard } from './components/MemoBoard'
 import { NightDim } from './components/NightDim'
 import { RecordForm } from './components/RecordForm'
 import { RecordList } from './components/RecordList'
+import { SettingsPanel } from './components/SettingsPanel'
 import { TabBar, type TabId } from './components/TabBar'
 
 // 통계는 Recharts를 포함해 무거우므로 기록 탭을 열 때만 지연 로딩한다.
@@ -15,23 +19,52 @@ const StatsSection = lazy(() =>
 )
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="font-[family-name:var(--font-display)] text-base text-ink">
-      {children}
-    </h2>
-  )
+  return <h2 className="text-base text-ink">{children}</h2>
 }
 
 function Loading({ label }: { label: string }) {
   return <p className="py-10 text-center text-sm text-faint">{label}</p>
 }
 
+/**
+ * 저장소를 못 읽었을 때. 사생활 보호 모드나 저장소 차단이면 IndexedDB가 열리지
+ * 않는데, 그때 '불러오는 중'만 계속 띄우면 고장 난 앱과 구분이 안 된다.
+ */
+function LoadError({ detail }: { detail: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 py-10 text-center">
+      <p className="text-sm text-ink">기록을 불러오지 못했어요</p>
+      <p className="max-w-[20rem] text-xs leading-relaxed text-faint">
+        브라우저 저장소를 열 수 없습니다. 사생활 보호 모드이거나 사이트 데이터가
+        차단돼 있으면 이럴 수 있어요.
+      </p>
+      <p className="max-w-[20rem] text-xs break-all text-faint">{detail}</p>
+    </div>
+  )
+}
+
 function App() {
-  const { records, loading, save, remove } = useRecords()
-  const { settings } = useSettings()
+  const {
+    records,
+    loading,
+    error,
+    save,
+    remove,
+    refresh: refreshRecords,
+  } = useRecords()
+  const { items, add: addItem, remove: removeItem, refresh: refreshItems } = useWatchlist()
+  const { memos, add: addMemo, remove: removeMemo, refresh: refreshMemos } = useMemos()
+  const { settings, update } = useSettings()
   const [tab, setTab] = useState<TabId>('home')
 
   const stats = computeStats(records)
+
+  // 예시 데이터를 넣거나 지운 뒤 세 스토어를 한꺼번에 다시 읽는다.
+  const refreshAll = useCallback(() => {
+    void refreshRecords()
+    void refreshItems()
+    void refreshMemos()
+  }, [refreshRecords, refreshItems, refreshMemos])
 
   return (
     <div className="min-h-screen bg-bg text-ink">
@@ -40,18 +73,23 @@ function App() {
 
         {/* 하단 탭바에 가리지 않도록 넉넉히 비운다 */}
         <main className="px-5 pb-28">
-          {tab === 'home' && (
-            <ComingSoon step="R3">
-              밤마다 무엇을 틀었는지 카드로 쌓입니다. 날짜와 잠들기를 시도한 시각,
-              썸네일, 제목이 한 장에 담깁니다.
-            </ComingSoon>
-          )}
+          {tab === 'home' &&
+            (error ? (
+              <LoadError detail={error} />
+            ) : loading ? (
+              <Loading label="불러오는 중" />
+            ) : (
+              <HomeFeed
+                records={records}
+                items={items}
+                onSaveRecord={save}
+                onAddItem={addItem}
+                onRemoveItem={removeItem}
+              />
+            ))}
 
           {tab === 'memo' && (
-            <ComingSoon step="R4">
-              떠오른 것을 붙여 두는 메모보드입니다. 두 줄로 쌓이고, 원하면 날짜를
-              달 수 있습니다.
-            </ComingSoon>
+            <MemoBoard memos={memos} onAdd={addMemo} onRemove={removeMemo} />
           )}
 
           {tab === 'record' && (
@@ -60,7 +98,9 @@ function App() {
 
               <section className="flex flex-col gap-3">
                 <SectionTitle>지난 기록</SectionTitle>
-                {loading ? (
+                {error ? (
+                  <LoadError detail={error} />
+                ) : loading ? (
                   <Loading label="불러오는 중" />
                 ) : (
                   <RecordList stats={stats} onDelete={remove} />
@@ -69,7 +109,7 @@ function App() {
 
               <section className="flex flex-col gap-3">
                 <SectionTitle>통계</SectionTitle>
-                {loading ? (
+                {error ? null : loading ? (
                   <Loading label="불러오는 중" />
                 ) : (
                   <Suspense fallback={<Loading label="차트 불러오는 중" />}>
@@ -81,32 +121,11 @@ function App() {
           )}
 
           {tab === 'settings' && (
-            <div className="flex flex-col gap-8">
-              <ComingSoon step="R6">
-                내보내기·가져오기, 기본 취침·기상 시각, 테마, 체중 기록 켜고 끄기가
-                들어옵니다.
-              </ComingSoon>
-
-              <div className="flex items-center justify-center gap-4 text-xs text-faint">
-                <a
-                  href="https://github.com/dlwhsk0/before-sleep"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-dim"
-                >
-                  소스 코드
-                </a>
-                <span aria-hidden="true">·</span>
-                <a
-                  href="https://github.com/dlwhsk0/before-sleep/issues/new"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-dim"
-                >
-                  의견 보내기
-                </a>
-              </div>
-            </div>
+            <SettingsPanel
+              settings={settings}
+              onChange={update}
+              onDataChanged={refreshAll}
+            />
           )}
         </main>
       </div>

@@ -1,5 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
-import type { DailyRecord } from '../types'
+import type { DailyRecord, Memo, WatchItem } from '../types'
 import { addMinutes } from './time'
 
 interface HealthDB extends DBSchema {
@@ -7,13 +7,23 @@ interface HealthDB extends DBSchema {
     key: string // date "YYYY-MM-DD"
     value: DailyRecord
   }
+  watchlist: {
+    key: string // WatchItem.id
+    value: WatchItem
+  }
+  memos: {
+    key: string // Memo.id
+    value: Memo
+  }
 }
 
 // 앱 이름이 '자기 전에'로 바뀌었어도 DB 이름은 그대로 둔다.
 // 바꾸면 기존 사용자의 IndexedDB가 새 DB로 갈려서 기록이 전부 사라진다.
 const DB_NAME = 'health-tracker'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const STORE = 'records'
+const WATCHLIST = 'watchlist'
+const MEMOS = 'memos'
 
 // v1 레거시 레코드 형태 (마이그레이션용)
 type LegacyRecord = {
@@ -57,6 +67,13 @@ function getDb(): Promise<IDBPDatabase<HealthDB>> {
             cursor = await cursor.continue()
           }
         }
+
+        // v3: 대기 목록·메모 스토어 추가. records는 손대지 않는다 —
+        // 필드가 optional로 넓어졌을 뿐이라 데이터 변환이 필요 없다.
+        if (oldVersion < 3) {
+          db.createObjectStore(WATCHLIST, { keyPath: 'id' })
+          db.createObjectStore(MEMOS, { keyPath: 'id' })
+        }
       },
     })
   }
@@ -86,4 +103,42 @@ export async function getAllRecords(): Promise<DailyRecord[]> {
 export async function deleteRecord(date: string): Promise<void> {
   const db = await getDb()
   await db.delete(STORE, date)
+}
+
+// ---- 대기 목록 (WatchItem) ----
+
+/** 대기 목록 전체를 추가한 순서의 역순(최신 먼저)으로. */
+export async function getAllWatchItems(): Promise<WatchItem[]> {
+  const db = await getDb()
+  const all = await db.getAll(WATCHLIST)
+  return all.sort((a, b) => b.addedAt.localeCompare(a.addedAt))
+}
+
+export async function putWatchItem(item: WatchItem): Promise<void> {
+  const db = await getDb()
+  await db.put(WATCHLIST, item)
+}
+
+export async function deleteWatchItem(id: string): Promise<void> {
+  const db = await getDb()
+  await db.delete(WATCHLIST, id)
+}
+
+// ---- 메모 ----
+
+/** 메모 전체를 최신 먼저. */
+export async function getAllMemos(): Promise<Memo[]> {
+  const db = await getDb()
+  const all = await db.getAll(MEMOS)
+  return all.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+}
+
+export async function putMemo(memo: Memo): Promise<void> {
+  const db = await getDb()
+  await db.put(MEMOS, memo)
+}
+
+export async function deleteMemo(id: string): Promise<void> {
+  const db = await getDb()
+  await db.delete(MEMOS, id)
 }

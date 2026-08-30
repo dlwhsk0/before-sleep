@@ -32,33 +32,33 @@
 
 /* 다크 = 기본값 */
 :root {
-  --c-bg: #0d1117; /* 밤하늘 */
-  --c-surface: #161b24; /* 카드 */
-  --c-surface-2: #1f2632; /* 입력·올려진 면 */
-  --c-line: #232a36;
-  --c-text: #e6eaf2;
-  --c-text-dim: #939cad; /* 배경 대비 6.74:1 */
-  --c-text-faint: #7a8496; /* 배경 대비 4.98:1 — 이보다 어두우면 AA 미달 */
+  --c-bg: #101a2f; /* 밤하늘 */
+  --c-surface: #18243f; /* 카드 */
+  --c-surface-2: #21304f; /* 입력·올려진 면 */
+  --c-line: #2b3d63;
+  --c-text: #e6ebf5;
+  --c-text-dim: #98a4bd; /* 배경 대비 6.87:1 */
+  --c-text-faint: #7e8cab; /* 배경 대비 5.12:1 — 이보다 어두우면 AA 미달 */
   --c-accent: #6ea8ff; /* 단 하나의 강조 */
-  --c-accent-soft: #2f4d73;
-  --c-dusk: #55618a; /* 수면 다이얼: 취침 쪽 */
-  --c-rise: #e88a80; /* 증가 */
+  --c-accent-soft: #2f4d80;
+  --c-dusk: #6470a8; /* 수면 다이얼: 취침 쪽 */
+  --c-rise: #ef8f85; /* 증가 */
   --c-fall: #8fc3a8; /* 감소 */
-  --c-danger: #ef8b82;
+  --c-danger: #ef8f85;
 
-  --chart-grid: #232a36;
-  --chart-axis: #7a8496;
+  --chart-grid: #2b3d63;
+  --chart-axis: #7e8cab;
   --chart-sleep: #6ea8ff;
   --chart-weight: #8fc3a8;
 
   /* 야간 디밍 오버레이 색 (배경보다 더 깊은 남색) */
-  --c-dim-veil: #04070d;
+  --c-dim-veil: #050a14;
 }
 
 /* 라이트 = 낮에 볼 때. 차가운 종이. */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) {
-    --c-bg: #f4f6fa;
+    --c-bg: #f2f5fb;
     --c-surface: #ffffff;
     --c-surface-2: #e8ecf3;
     --c-line: #d6dce6;
@@ -80,7 +80,7 @@
 }
 
 :root[data-theme='light'] {
-  --c-bg: #f4f6fa;
+  --c-bg: #f2f5fb;
   --c-surface: #ffffff;
   --c-surface-2: #e8ecf3;
   --c-line: #d6dce6;
