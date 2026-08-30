@@ -4,7 +4,7 @@ import { durationMinutes, formatClock } from '../lib/time'
 /**
  * 단일 24시간 원형 다이얼로 수면 시각을 정한다.
  * - 원 한 바퀴 = 24시간 (12시 방향=0시, 시계방향) → 24시간 전부 선택 가능.
- * - 취침(indigo)/기상(amber) 두 핸들을 드래그/방향키로 조정. 5분 단위 스냅.
+ * - 취침(땅거미)/기상(동틀녘) 두 핸들을 드래그/방향키로 조정. 5분 단위 스냅.
  * - 두 핸들 사이를 호로 이어 수면 구간을 표시.
  *
  * 값은 상위(폼)가 소유하는 controlled 컴포넌트. start/end는 자정 기준 분(0–1439).
@@ -16,8 +16,9 @@ const R = 100
 const HANDLE = 15
 const SNAP = 5 // 분
 
-export const START_COLOR = '#6366f1' // indigo (취침)
-export const END_COLOR = '#f59e0b' // amber (기상)
+// 호는 땅거미에서 동틀녘으로 건너간다. 끝점은 앱의 유일한 강조색과 같다.
+export const START_COLOR = 'var(--c-dusk)'
+export const END_COLOR = 'var(--c-ember)'
 
 /** 값 비율(0~1)을 원 위 좌표로. 12시 방향(위)이 0, 시계방향. */
 function polar(r: number, frac: number) {
@@ -109,7 +110,7 @@ export function SleepClock({
           r={R}
           fill="none"
           strokeWidth={2}
-          className="stroke-neutral-200 dark:stroke-neutral-700"
+          className="stroke-line"
         />
 
         {/* 취침 → 기상 수면 구간 호 (취침색 → 기상색 그라데이션) */}
@@ -124,8 +125,8 @@ export function SleepClock({
                 x2={arcEnd.x}
                 y2={arcEnd.y}
               >
-                <stop offset="0%" stopColor={START_COLOR} />
-                <stop offset="100%" stopColor={END_COLOR} />
+                <stop offset="0%" style={{ stopColor: START_COLOR }} />
+                <stop offset="100%" style={{ stopColor: END_COLOR }} />
               </linearGradient>
             </defs>
             <path
@@ -148,7 +149,7 @@ export function SleepClock({
               y={p.y}
               dy="0.32em"
               textAnchor="middle"
-              className="fill-neutral-400 text-[10px]"
+              className="fill-faint text-[10px]"
             >
               {h}
             </text>
@@ -164,14 +165,13 @@ export function SleepClock({
               cx={p.x}
               cy={p.y}
               r={HANDLE}
-              fill={h.color}
-              stroke="white"
+              style={{ fill: h.color }}
               strokeWidth={2}
               role="slider"
               tabIndex={0}
               aria-label={h.label}
               aria-valuetext={formatClock(h.value)}
-              className="cursor-grab touch-none outline-none focus:stroke-neutral-900 active:cursor-grabbing dark:focus:stroke-neutral-100"
+              className="cursor-grab touch-none stroke-bg outline-none focus:stroke-ink active:cursor-grabbing"
               onPointerDown={(e) => e.currentTarget.setPointerCapture(e.pointerId)}
               onPointerMove={onHandleMove(h)}
               onKeyDown={onHandleKey(h)}

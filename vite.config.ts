@@ -11,6 +11,26 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
+      workbox: {
+        // 웹폰트는 빌드 산출물이 아니라 런타임에 받으므로 따로 캐시해야
+        // 오프라인에서도 같은 글꼴로 뜬다.
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\//,
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'google-fonts-stylesheets' },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-webfonts',
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
       manifest: {
         name: '자기 전에',
         short_name: '자기 전에',

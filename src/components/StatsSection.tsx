@@ -18,7 +18,7 @@ export function StatsSection({ stats }: { stats: RecordStats[] }) {
       <MonthCalendar recordedDates={recordedDates} />
 
       {stats.length < 2 ? (
-        <p className="py-4 text-center text-sm text-neutral-400">
+        <p className="py-4 text-center text-sm text-faint">
           기록이 2개 이상 쌓이면 추이가 보여요.
         </p>
       ) : (

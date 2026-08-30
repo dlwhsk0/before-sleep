@@ -1,25 +1,142 @@
 @import 'tailwindcss';
 
-:root {
-  color-scheme: light dark;
+/*
+ * 자기 전에 — 디자인 토큰
+ *
+ * 이 앱은 불 끈 방에서, 자려고 누운 상태로 쓴다. 그래서 두 가지가 색을 결정한다.
+ *
+ * 1) 다크가 기본이고 라이트가 예외다. (대부분 앱의 반대)
+ * 2) 색조는 따뜻한 쪽으로 민다. 청색광은 멜라토닌을 억제하니, 취침 직전에 쓰는
+ *    앱에서 파란 강조색은 목적에 정면으로 어긋난다. (전신 앱의 indigo #6366f1을 버린 이유)
+ *
+ * 강조색은 --ember 하나뿐이고 "오늘 밤"과 활성 상태에만 쓴다. 화면에서 채도를
+ * 가진 것은 영상 썸네일뿐이어서, 눈이 "오늘 뭘 볼지"로 곧장 간다.
+ */
 
-  /* 차트 색 (Recharts에 var()로 전달) */
-  --chart-grid: #e5e5e5;
-  --chart-axis: #a3a3a3;
-  --chart-weight: #6366f1; /* indigo */
-  --chart-sleep: #0ea5e9; /* sky */
-  --chart-cum: #f59e0b; /* amber */
+/* 다크 = 기본값 */
+:root {
+  --c-bg: #12100e; /* 밤의 방 */
+  --c-surface: #1b1815; /* 카드 */
+  --c-surface-2: #262220; /* 입력·올려진 면 */
+  --c-line: #302b27;
+  --c-text: #ede6dd; /* 따뜻한 오프화이트. 순백은 어둠에서 번진다 */
+  --c-text-dim: #9a8f84; /* 배경 대비 5.98:1 */
+  --c-text-faint: #857a70; /* 배경 대비 4.60:1 — 이보다 어두우면 AA 미달 */
+  --c-ember: #c79a64; /* 단 하나의 강조 */
+  --c-ember-soft: #6d5539;
+  /* 증감 표시용. 채도를 낮춰 강조색 자리를 넘보지 않게 한다. */
+  --c-dusk: #6a6480; /* 수면 다이얼: 취침(땅거미) */
+  --c-rise: #c2705a;
+  --c-fall: #7f9a8b;
+  --c-danger: #c2705a;
+
+  --chart-grid: #302b27;
+  --chart-axis: #6b625b;
+  --chart-sleep: #c79a64;
+  --chart-weight: #7f8b7a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --chart-grid: #333333;
-    --chart-axis: #777777;
+/* 라이트 = 밤새 켜둔 종이등 느낌. 시스템이 라이트일 때만, 그리고 명시 지정 시 */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --c-bg: #f5f1ea;
+    --c-surface: #fffdf9;
+    --c-surface-2: #ebe5db;
+    --c-line: #ddd5c8;
+    --c-text: #241f1b;
+    --c-text-dim: #554c44; /* 7.5:1 */
+    --c-text-faint: #6f6459; /* 5.25:1 */
+    --c-ember: #8a6234;
+    --c-ember-soft: #d9c3a3;
+    --c-dusk: #575070;
+    --c-dusk: #575070;
+  --c-rise: #a3543f;
+    --c-fall: #5c7668;
+    --c-danger: #a3543f;
+
+    --chart-grid: #ddd5c8;
+    --chart-axis: #9a8f84;
+    --chart-sleep: #8a6234;
+    --chart-weight: #6e7a69;
   }
+}
+
+:root[data-theme='light'] {
+  --c-bg: #f5f1ea;
+  --c-surface: #fffdf9;
+  --c-surface-2: #ebe5db;
+  --c-line: #ddd5c8;
+  --c-text: #241f1b;
+  --c-text-dim: #554c44; /* 7.5:1 */
+  --c-text-faint: #6f6459; /* 5.25:1 */
+  --c-ember: #8a6234;
+  --c-ember-soft: #d9c3a3;
+  --c-rise: #a3543f;
+  --c-fall: #5c7668;
+  --c-danger: #a3543f;
+
+  --chart-grid: #ddd5c8;
+  --chart-axis: #9a8f84;
+  --chart-sleep: #8a6234;
+  --chart-weight: #6e7a69;
+}
+
+/* Tailwind 유틸리티에 토큰을 노출. 값은 var()라서 테마 전환이 런타임에 먹는다. */
+@theme {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-line: var(--c-line);
+  --color-ink: var(--c-text);
+  --color-dim: var(--c-text-dim);
+  --color-faint: var(--c-text-faint);
+  --color-ember: var(--c-ember);
+  --color-ember-soft: var(--c-ember-soft);
+  --color-dusk: var(--c-dusk);
+  --color-rise: var(--c-rise);
+  --color-fall: var(--c-fall);
+  --color-danger: var(--c-danger);
+
+  /* 본문은 시스템 한글 스택. iOS·macOS에서 Apple SD Gothic Neo가 잡히고,
+     웹폰트 없이 즉시 그려지며 오프라인에서도 안전하다. */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo',
+    system-ui, 'Malgun Gothic', sans-serif;
+  /* 날짜·제목용 명조. 자려는 사람에게 산세리프보다 부드럽게 말한다. */
+  --font-display: 'Gowun Batang', 'Apple SD Gothic Neo', serif;
+  /* 시각은 데이터다. 23:30이 카드마다 같은 자리에 오도록 고정폭. */
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* 홈 화면에 추가해 쓸 때 고무줄 스크롤로 배경이 비치지 않게 */
+  overscroll-behavior-y: none;
+}
+
+/* 시각·수치는 표처럼 읽히도록 */
+.tnum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* 키보드 포커스는 반드시 보이게. 강조색이 하나뿐이라 ember를 쓴다. */
+:focus-visible {
+  outline: 2px solid var(--c-ember);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -20,7 +20,7 @@ export function DeltaBadge({
 
   if (value === 0) {
     return (
-      <span className="text-neutral-400">
+      <span className="text-faint">
         {prefix}±{format(0)}
       </span>
     )
@@ -28,7 +28,7 @@ export function DeltaBadge({
 
   const up = value > 0
   return (
-    <span className={up ? 'text-red-500' : 'text-blue-500'}>
+    <span className={up ? 'text-rise' : 'text-fall'}>
       {prefix}
       {up ? '↑' : '↓'}
       {format(Math.abs(value))}

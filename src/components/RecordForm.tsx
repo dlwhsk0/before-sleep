@@ -84,10 +84,10 @@ export function RecordForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-5 rounded-xl border border-neutral-200 p-5 dark:border-neutral-800"
+      className="flex flex-col gap-5 rounded-xl border border-line p-5"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-50">
+        <h2 className="text-base font-semibold text-ink">
           기록
         </h2>
         <input
@@ -95,13 +95,13 @@ export function RecordForm({
           value={date}
           max={todayKey()}
           onChange={(e) => setDate(e.target.value)}
-          className="rounded-lg border border-neutral-300 px-2 py-1 text-sm outline-none focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
+          className="rounded-lg border border-line px-2 py-1 text-sm outline-none focus:border-ink"
         />
       </div>
 
       {/* 수면: 왼쪽 원형 다이얼 + 오른쪽 세부/소요 */}
       <div className="flex flex-col gap-3">
-        <span className="text-sm text-neutral-500">수면</span>
+        <span className="text-sm text-dim">수면</span>
         <div className="flex items-center gap-4">
           <SleepClock
             start={sleepStart}
@@ -115,23 +115,23 @@ export function RecordForm({
           {/* 오른쪽: 취침/기상 세부 + 총 수면시간 + 소요 편집 */}
           <div className="flex min-w-0 flex-1 flex-col gap-3">
             <div className="flex flex-col gap-1.5 text-sm">
-              <span className="flex items-center gap-1.5 text-neutral-500">
+              <span className="flex items-center gap-1.5 text-dim">
                 <span
                   className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ background: START_COLOR }}
                 />
                 취침
-                <span className="font-medium text-neutral-900 dark:text-neutral-50">
+                <span className="font-medium text-ink">
                   {formatClock(sleepStart)}
                 </span>
               </span>
-              <span className="flex items-center gap-1.5 text-neutral-500">
+              <span className="flex items-center gap-1.5 text-dim">
                 <span
                   className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ background: END_COLOR }}
                 />
                 기상
-                <span className="font-medium text-neutral-900 dark:text-neutral-50">
+                <span className="font-medium text-ink">
                   {formatClock(sleepEnd)}
                 </span>
               </span>
@@ -140,8 +140,8 @@ export function RecordForm({
             {/* 소요 총 수면시간 + 직접 편집 (취침 고정, 기상 이동) */}
             <div className="flex flex-col gap-1.5">
               <div className="flex items-baseline gap-2">
-                <span className="text-sm text-neutral-500">소요</span>
-                <span className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
+                <span className="text-sm text-dim">소요</span>
+                <span className="text-lg font-semibold text-ink">
                   {formatHM(dur)}
                 </span>
               </div>
@@ -152,9 +152,9 @@ export function RecordForm({
                   max="23"
                   value={durH}
                   onChange={(e) => setDuration(Number(e.target.value), durM)}
-                  className="w-12 rounded-lg border border-neutral-300 px-2 py-1 text-right outline-none focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
+                  className="w-12 rounded-lg border border-line px-2 py-1 text-right outline-none focus:border-ink"
                 />
-                <span className="text-neutral-500">시간</span>
+                <span className="text-dim">시간</span>
                 <input
                   type="number"
                   min="0"
@@ -162,9 +162,9 @@ export function RecordForm({
                   step="5"
                   value={durM}
                   onChange={(e) => setDuration(durH, Number(e.target.value))}
-                  className="w-12 rounded-lg border border-neutral-300 px-2 py-1 text-right outline-none focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
+                  className="w-12 rounded-lg border border-line px-2 py-1 text-right outline-none focus:border-ink"
                 />
-                <span className="text-neutral-500">분</span>
+                <span className="text-dim">분</span>
               </div>
             </div>
           </div>
@@ -173,13 +173,13 @@ export function RecordForm({
 
       {/* 몸무게 (중앙 정렬 + 양옆 −/+ 스테퍼) */}
       <div className="flex flex-col gap-1">
-        <span className="text-sm text-neutral-500">몸무게 (kg)</span>
+        <span className="text-sm text-dim">몸무게 (kg)</span>
         <div className="flex items-center justify-center gap-3">
           <button
             type="button"
             aria-label="0.1kg 감소"
             onClick={() => stepWeight(-0.1)}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-2xl leading-none text-neutral-700 active:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:active:bg-neutral-800"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line text-2xl leading-none text-ink active:bg-surface-2"
           >
             −
           </button>
@@ -191,13 +191,13 @@ export function RecordForm({
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             onBlur={normalizeWeight}
-            className="w-28 rounded-lg border border-neutral-300 px-3 py-2 text-center text-lg outline-none focus:border-neutral-900 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-neutral-100"
+            className="w-28 rounded-lg border border-line px-3 py-2 text-center text-lg outline-none focus:border-ink [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
           <button
             type="button"
             aria-label="0.1kg 증가"
             onClick={() => stepWeight(0.1)}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-2xl leading-none text-neutral-700 active:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-200 dark:active:bg-neutral-800"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line text-2xl leading-none text-ink active:bg-surface-2"
           >
             +
           </button>
@@ -207,7 +207,7 @@ export function RecordForm({
       <button
         type="submit"
         disabled={!valid || saving}
-        className="rounded-lg bg-neutral-900 px-4 py-2.5 font-medium text-white transition-opacity disabled:opacity-40 dark:bg-neutral-100 dark:text-neutral-900"
+        className="rounded-lg bg-ember px-4 py-2.5 font-medium text-bg transition-opacity disabled:opacity-40"
       >
         {saving ? '저장 중…' : existing ? '기록 수정' : '기록 저장'}
       </button>

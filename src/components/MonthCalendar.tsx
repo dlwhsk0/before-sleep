@@ -44,19 +44,19 @@ export function MonthCalendar({ recordedDates }: { recordedDates: string[] }) {
   const atCurrentMonth = y > todayYm.y || (y === todayYm.y && m >= todayYm.m)
 
   const navClass =
-    'flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 hover:text-neutral-700 disabled:opacity-30 dark:hover:text-neutral-200'
+    'flex h-7 w-7 items-center justify-center rounded-full text-faint hover:text-ink disabled:opacity-30'
 
   return (
-    <div className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
+    <div className="rounded-xl border border-line p-4">
       <div className="mb-3 flex items-center justify-between">
         <button type="button" onClick={prev} aria-label="이전 달" className={navClass}>
           ‹
         </button>
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">
+          <span className="text-sm font-semibold text-ink">
             {y}년 {m}월
           </span>
-          <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500 dark:bg-neutral-800">
+          <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-dim">
             {count}일 기록
           </span>
         </div>
@@ -73,7 +73,7 @@ export function MonthCalendar({ recordedDates }: { recordedDates: string[] }) {
 
       <div className="grid grid-cols-7 gap-1 text-center">
         {WEEKDAYS.map((w) => (
-          <div key={w} className="py-1 text-xs text-neutral-400">
+          <div key={w} className="py-1 text-xs text-faint">
             {w}
           </div>
         ))}
@@ -87,10 +87,10 @@ export function MonthCalendar({ recordedDates }: { recordedDates: string[] }) {
               <span
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-xs ${
                   isRecorded
-                    ? 'bg-indigo-500 font-medium text-white'
+                    ? 'bg-ember font-medium text-bg'
                     : isToday
-                      ? 'text-neutral-500 ring-1 ring-neutral-300 dark:text-neutral-300 dark:ring-neutral-600'
-                      : 'text-neutral-400'
+                      ? 'text-dim ring-1 ring-line'
+                      : 'text-faint'
                 }`}
               >
                 {d}

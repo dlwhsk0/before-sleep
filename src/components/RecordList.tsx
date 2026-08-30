@@ -18,7 +18,7 @@ function DeleteButton({ onConfirm }: { onConfirm: () => Promise<void> }) {
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="text-xs text-neutral-400 hover:text-red-500"
+        className="text-xs text-faint hover:text-danger"
       >
         삭제
       </button>
@@ -27,18 +27,18 @@ function DeleteButton({ onConfirm }: { onConfirm: () => Promise<void> }) {
 
   return (
     <span className="flex items-center gap-2 text-xs">
-      <span className="text-neutral-500">삭제할까요?</span>
+      <span className="text-dim">삭제할까요?</span>
       <button
         type="button"
         onClick={() => onConfirm()}
-        className="font-medium text-red-500 hover:text-red-600"
+        className="font-medium text-rise hover:text-danger"
       >
         삭제
       </button>
       <button
         type="button"
         onClick={() => setConfirming(false)}
-        className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+        className="text-faint hover:text-dim"
       >
         취소
       </button>
@@ -69,19 +69,19 @@ function WeightRow({ row }: { row: RecordStats }) {
         onBlur={hide}
         className="flex w-full touch-none items-baseline justify-between text-left"
       >
-        <span className="text-neutral-500">몸무게</span>
+        <span className="text-dim">몸무게</span>
         <span className="flex items-baseline gap-2">
           {peek ? (
-            <span className="text-base font-medium text-neutral-900 dark:text-neutral-50">
+            <span className="text-base font-medium text-ink">
               {kg(row.weightKg)}
             </span>
           ) : (
-            <span className="text-xs text-neutral-400">눌러서 보기</span>
+            <span className="text-xs text-faint">눌러서 보기</span>
           )}
           <DeltaBadge value={row.weightDelta} format={kg} />
           {/* 괄호 안 값 = 첫날 대비 (라벨은 리스트 헤더에 표기) */}
           {row.weightDeltaFromStart !== null && (
-            <span className="flex items-baseline text-neutral-400">
+            <span className="flex items-baseline text-faint">
               (<DeltaBadge value={row.weightDeltaFromStart} format={kg} />)
             </span>
           )}
@@ -104,7 +104,7 @@ export function RecordList({
 }) {
   if (stats.length === 0) {
     return (
-      <p className="py-8 text-center text-sm text-neutral-400">
+      <p className="py-8 text-center text-sm text-faint">
         아직 기록이 없어요. 위에서 오늘 기록을 저장해보세요.
       </p>
     )
@@ -119,13 +119,13 @@ export function RecordList({
       {rows.map((row) => (
         <li
           key={row.date}
-          className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800"
+          className="rounded-xl border border-line p-4"
         >
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-neutral-900 dark:text-neutral-50">
+            <span className="text-sm font-medium text-ink">
               {row.date}
               {row.date === today && (
-                <span className="ml-2 rounded bg-neutral-900 px-1.5 py-0.5 text-xs text-white dark:bg-neutral-100 dark:text-neutral-900">
+                <span className="ml-2 rounded bg-ember px-1.5 py-0.5 text-xs text-bg">
                   오늘
                 </span>
               )}
@@ -135,12 +135,12 @@ export function RecordList({
 
           <div className="flex flex-col gap-1 text-sm">
             <div className="flex items-baseline justify-between">
-              <span className="text-neutral-500">수면</span>
+              <span className="text-dim">수면</span>
               <span className="flex items-baseline gap-2">
-                <span className="text-base font-medium text-neutral-900 dark:text-neutral-50">
+                <span className="text-base font-medium text-ink">
                   {formatClock(row.sleepStart)} → {formatClock(row.sleepEnd)}
                 </span>
-                <span className="text-neutral-500">
+                <span className="text-dim">
                   · {formatHM(row.sleepMinutes)}
                 </span>
                 <DeltaBadge value={row.sleepDeltaMinutes} format={formatHM} />

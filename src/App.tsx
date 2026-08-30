@@ -1,140 +1,119 @@
 import { lazy, Suspense, useState } from 'react'
 import { useRecords } from './hooks/useRecords'
+import { useSettings } from './hooks/useSettings'
 import { computeStats } from './lib/stats'
+import { AppHeader } from './components/AppHeader'
+import { ComingSoon } from './components/ComingSoon'
+import { NightDim } from './components/NightDim'
 import { RecordForm } from './components/RecordForm'
 import { RecordList } from './components/RecordList'
+import { TabBar, type TabId } from './components/TabBar'
 
-// 통계 화면은 Recharts를 포함해 무거우므로, 통계 탭을 열 때만 지연 로딩한다.
+// 통계는 Recharts를 포함해 무거우므로 기록 탭을 열 때만 지연 로딩한다.
 const StatsSection = lazy(() =>
   import('./components/StatsSection').then((m) => ({ default: m.StatsSection })),
 )
 
-type Tab = 'record' | 'stats'
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="font-[family-name:var(--font-display)] text-base text-ink">
+      {children}
+    </h2>
+  )
+}
+
+function Loading({ label }: { label: string }) {
+  return <p className="py-10 text-center text-sm text-faint">{label}</p>
+}
 
 function App() {
   const { records, loading, save, remove } = useRecords()
-  const [tab, setTab] = useState<Tab>('record')
+  const { settings } = useSettings()
+  const [tab, setTab] = useState<TabId>('home')
 
   const stats = computeStats(records)
 
-  const tabClass = (active: boolean) =>
-    `flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
-      active
-        ? 'bg-white text-neutral-900 shadow-sm dark:bg-neutral-900 dark:text-neutral-50'
-        : 'text-neutral-500'
-    }`
-
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-4 py-8">
-      <header>
-        <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-50">
-          자기 전에
-        </h1>
-        <p className="text-sm text-neutral-500">
-          자기 전에 틀 영상 하나를 미리 골라둬요
-        </p>
-      </header>
+    <div className="min-h-screen bg-bg text-ink">
+      <div className="mx-auto max-w-md">
+        <AppHeader />
 
-      {/* 탭 바 */}
-      <div className="flex gap-1 rounded-lg bg-neutral-100 p-1 dark:bg-neutral-800">
-        <button
-          type="button"
-          onClick={() => setTab('record')}
-          className={tabClass(tab === 'record')}
-        >
-          기록
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('stats')}
-          className={tabClass(tab === 'stats')}
-        >
-          통계
-        </button>
+        {/* 하단 탭바에 가리지 않도록 넉넉히 비운다 */}
+        <main className="px-5 pb-28">
+          {tab === 'home' && (
+            <ComingSoon step="R3">
+              밤마다 무엇을 틀었는지 카드로 쌓입니다. 날짜와 잠들기를 시도한 시각,
+              썸네일, 제목이 한 장에 담깁니다.
+            </ComingSoon>
+          )}
+
+          {tab === 'memo' && (
+            <ComingSoon step="R4">
+              떠오른 것을 붙여 두는 메모보드입니다. 두 줄로 쌓이고, 원하면 날짜를
+              달 수 있습니다.
+            </ComingSoon>
+          )}
+
+          {tab === 'record' && (
+            <div className="flex flex-col gap-8">
+              <RecordForm records={records} onSave={save} />
+
+              <section className="flex flex-col gap-3">
+                <SectionTitle>지난 기록</SectionTitle>
+                {loading ? (
+                  <Loading label="불러오는 중" />
+                ) : (
+                  <RecordList stats={stats} onDelete={remove} />
+                )}
+              </section>
+
+              <section className="flex flex-col gap-3">
+                <SectionTitle>통계</SectionTitle>
+                {loading ? (
+                  <Loading label="불러오는 중" />
+                ) : (
+                  <Suspense fallback={<Loading label="차트 불러오는 중" />}>
+                    <StatsSection stats={stats} />
+                  </Suspense>
+                )}
+              </section>
+            </div>
+          )}
+
+          {tab === 'settings' && (
+            <div className="flex flex-col gap-8">
+              <ComingSoon step="R6">
+                내보내기·가져오기, 기본 취침·기상 시각, 테마, 체중 기록 켜고 끄기가
+                들어옵니다.
+              </ComingSoon>
+
+              <div className="flex items-center justify-center gap-4 text-xs text-faint">
+                <a
+                  href="https://github.com/dlwhsk0/before-sleep"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-dim"
+                >
+                  소스 코드
+                </a>
+                <span aria-hidden="true">·</span>
+                <a
+                  href="https://github.com/dlwhsk0/before-sleep/issues/new"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-dim"
+                >
+                  의견 보내기
+                </a>
+              </div>
+            </div>
+          )}
+        </main>
       </div>
 
-      {tab === 'record' ? (
-        <>
-          <RecordForm records={records} onSave={save} />
-          <section className="flex flex-col gap-3">
-            <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-50">
-              기록{' '}
-              <span className="text-xs font-normal text-neutral-400">
-                (첫날 대비)
-              </span>
-            </h2>
-            {loading ? (
-              <p className="py-8 text-center text-sm text-neutral-400">
-                불러오는 중…
-              </p>
-            ) : (
-              <RecordList stats={stats} onDelete={remove} />
-            )}
-          </section>
-        </>
-      ) : (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-50">
-            통계
-          </h2>
-          {loading ? (
-            <p className="py-8 text-center text-sm text-neutral-400">불러오는 중…</p>
-          ) : (
-            <Suspense
-              fallback={
-                <p className="py-8 text-center text-sm text-neutral-400">
-                  차트 불러오는 중…
-                </p>
-              }
-            >
-              <StatsSection stats={stats} />
-            </Suspense>
-          )}
-        </section>
-      )}
-
-      <footer className="mt-auto flex items-center justify-center gap-4 pt-8 text-xs text-neutral-400">
-        <a
-          href="https://github.com/dlwhsk0/before-sleep"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 transition-colors hover:text-neutral-600 dark:hover:text-neutral-300"
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z" />
-          </svg>
-          소스 코드
-        </a>
-        <span aria-hidden="true">·</span>
-        <a
-          href="https://github.com/dlwhsk0/before-sleep/issues/new"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 transition-colors hover:text-neutral-600 dark:hover:text-neutral-300"
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          의견 보내기
-        </a>
-      </footer>
-    </main>
+      <TabBar value={tab} onChange={setTab} />
+      <NightDim enabled={settings.dimAtNight} />
+    </div>
   )
 }
 
