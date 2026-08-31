@@ -54,17 +54,17 @@ export function HomeFeed({
   )
 
   /**
-   * 오늘 밤 영상을 고른다.
+   * 고른 영상을 그 밤에 붙인다. 오늘이 아닌 지난 날짜도 받는다.
    *
-   * 고른 시각을 "틀은 시각"의 기본값으로 함께 넣는다 — 카드를 만드는 때가 곧
-   * 영상을 트는 때이므로. 이미 기록돼 있으면 덮어쓰지 않는다(기록 탭에서 고친 값 보존).
+   * 오늘이면 지금 시각을 "틀은 시각"의 기본값으로 함께 넣는다 — 카드를 만드는
+   * 때가 곧 영상을 트는 때이므로. 지난 밤은 지금 시각이 아무 의미가 없으니
+   * 비워 두고 기록 탭에서 채우게 한다. 이미 값이 있으면 덮어쓰지 않는다.
    */
-  const pick = async (id: string) => {
-    await onSaveRecord({
-      ...todayRecord,
-      watchItemId: id,
-      sleepStart: todayRecord.sleepStart ?? nowMinutes(),
-    })
+  const pick = async (id: string, date: string) => {
+    const existing = records.find((r) => r.date === date) ?? { date }
+    const next: DailyRecord = { ...existing, watchItemId: id }
+    if (date === today && next.sleepStart === undefined) next.sleepStart = nowMinutes()
+    await onSaveRecord(next)
   }
 
   /**
@@ -84,6 +84,21 @@ export function HomeFeed({
 
   return (
     <div className="flex flex-col gap-6">
+      {/*
+        추가 진입로. 카드 안의 작은 '고르기' 링크만 두면 찾기 어렵고,
+        지난 밤을 기록할 방법이 아예 없었다.
+      */}
+      <button
+        type="button"
+        onClick={() => setSheet({ kind: 'pick' })}
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-surface/50 py-3 text-[0.8125rem] text-dim transition-colors hover:border-accent-soft hover:text-ink"
+      >
+        <span aria-hidden="true" className="text-base leading-none">
+          +
+        </span>
+        오늘 밤 · 지난 밤 기록하기
+      </button>
+
       <NightCard
         record={todayRecord}
         item={todayRecord.watchItemId ? byId.get(todayRecord.watchItemId) : undefined}

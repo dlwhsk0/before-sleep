@@ -59,7 +59,13 @@ function App() {
     remove: removeItem,
     refresh: refreshItems,
   } = useWatchlist()
-  const { memos, add: addMemo, remove: removeMemo, refresh: refreshMemos } = useMemos()
+  const {
+    memos,
+    add: addMemo,
+    update: updateMemo,
+    remove: removeMemo,
+    refresh: refreshMemos,
+  } = useMemos()
   const { settings, update } = useSettings()
   const [tab, setTab] = useState<TabId>('home')
 
@@ -96,7 +102,12 @@ function App() {
             ))}
 
           {tab === 'memo' && (
-            <MemoBoard memos={memos} onAdd={addMemo} onRemove={removeMemo} />
+            <MemoBoard
+              memos={memos}
+              onAdd={addMemo}
+              onUpdate={updateMemo}
+              onRemove={removeMemo}
+            />
           )}
 
           {tab === 'record' && (

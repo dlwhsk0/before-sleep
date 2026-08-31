@@ -24,13 +24,21 @@ export function useMemos() {
   }, [refresh])
 
   const add = useCallback(
-    async (text: string, date?: string) => {
+    async (text: string, date: string) => {
       const memo: Memo = {
         id: crypto.randomUUID(),
         text: text.trim(),
+        date,
         createdAt: new Date().toISOString(),
       }
-      if (date) memo.date = date
+      await putMemo(memo)
+      await refresh()
+    },
+    [refresh],
+  )
+
+  const update = useCallback(
+    async (memo: Memo) => {
       await putMemo(memo)
       await refresh()
     },
@@ -45,5 +53,5 @@ export function useMemos() {
     [refresh],
   )
 
-  return { memos, loading, error, add, remove, refresh }
+  return { memos, loading, error, add, update, remove, refresh }
 }

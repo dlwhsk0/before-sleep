@@ -1,8 +1,8 @@
-import { useRef } from 'react'
 import type { DailyRecord, WatchItem } from '../types'
 import { parseWatchItem } from '../lib/watchItem'
 import { formatClock, formatHM } from '../lib/time'
 import { Thumbnail } from './Thumbnail'
+import { useLongPress } from '../hooks/useLongPress'
 
 const dateFormat = new Intl.DateTimeFormat('ko-KR', {
   month: 'long',
@@ -14,8 +14,6 @@ function formatDateKey(dateKey: string): string {
   const [y, m, d] = dateKey.split('-').map(Number)
   return dateFormat.format(new Date(y, m - 1, d))
 }
-
-const LONG_PRESS_MS = 500
 
 type Props = {
   record: DailyRecord
@@ -40,23 +38,7 @@ type Props = {
  */
 export function NightCard({ record, item, today, onPick, onActions }: Props) {
   const parsed = item ? parseWatchItem(item.text, item.note, item.fetchedTitle) : null
-  const timer = useRef<number | null>(null)
-
-  const clear = () => {
-    if (timer.current !== null) {
-      clearTimeout(timer.current)
-      timer.current = null
-    }
-  }
-
-  const startPress = () => {
-    if (!onActions) return
-    clear()
-    timer.current = window.setTimeout(() => {
-      timer.current = null
-      onActions()
-    }, LONG_PRESS_MS)
-  }
+  const press = useLongPress(onActions)
 
   const media = (
     <Thumbnail
@@ -72,32 +54,8 @@ export function NightCard({ record, item, today, onPick, onActions }: Props) {
       className={`flex flex-col gap-3 rounded-xl border bg-surface p-3 ${
         today ? 'border-accent-soft' : 'border-line'
       }`}
-      // 길게 누르기 = 수정/삭제. 항목이 있을 때만 onActions가 넘어온다.
-      onPointerDown={startPress}
-      onPointerUp={clear}
-      onPointerLeave={clear}
-      onPointerCancel={clear}
-      onContextMenu={
-        onActions
-          ? (e) => {
-              e.preventDefault()
-              onActions()
-            }
-          : undefined
-      }
-      // 길게 누르기만 두면 키보드로 닿을 수 없으므로 포커스 + Enter도 받는다.
-      tabIndex={onActions ? 0 : undefined}
-      onKeyDown={
-        onActions
-          ? (e) => {
-              if (e.target !== e.currentTarget) return
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onActions()
-              }
-            }
-          : undefined
-      }
+      // 길게 누르기·우클릭·포커스 후 Enter = 수정. 항목이 있을 때만 붙는다.
+      {...press.handlers}
       aria-label={onActions ? `${parsed?.title ?? '제목 없음'} — 수정` : undefined}
     >
       <div className="flex items-baseline justify-between gap-3 px-1">
@@ -123,9 +81,9 @@ export function NightCard({ record, item, today, onPick, onActions }: Props) {
           rel="noopener noreferrer"
           className="block rounded-lg"
           // 길게 누르는 동안 링크가 열리지 않게 한다.
+          // 길게 누르는 중이면 링크가 열리지 않게 한다.
           onClick={(e) => {
-            if (timer.current === null && onActions) return
-            if (timer.current !== null) e.preventDefault()
+            if (press.pressed() || press.fired()) e.preventDefault()
           }}
         >
           {media}

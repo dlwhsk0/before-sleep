@@ -3,6 +3,7 @@ import type { WatchItem } from '../types'
 import { parseWatchItem } from '../lib/watchItem'
 import { fetchYoutubeTitle } from '../lib/youtubeTitle'
 import { formatHM } from '../lib/time'
+import { todayKey } from '../lib/date'
 import { Thumbnail } from './Thumbnail'
 
 type Props = {
@@ -18,7 +19,8 @@ type Props = {
     durationMinutes?: number,
     fetchedTitle?: string,
   ) => Promise<WatchItem>
-  onSelect: (id: string) => void
+  /** 어느 밤에 붙일지. 날짜를 함께 넘긴다 (지난 밤도 기록할 수 있게) */
+  onSelect: (id: string, date: string) => void
   onRemove: (id: string) => void
   onClose: () => void
 }
@@ -53,6 +55,8 @@ export function TonightPicker({
   )
   // 유튜브에서 자동으로 받아온 제목. 직접 쓴 제목이 없을 때만 쓰인다.
   const [fetchedTitle, setFetchedTitle] = useState(editing?.fetchedTitle ?? '')
+  // 어느 밤 기록인지. 오늘이 기본이고 지난 날짜도 고를 수 있다.
+  const [date, setDate] = useState(todayKey())
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -113,7 +117,7 @@ export function TonightPicker({
     setHours('')
     setMinutes('')
     setFetchedTitle('')
-    onSelect(item.id)
+    onSelect(item.id, date)
   }
 
   const preview = trimmed ? parseWatchItem(trimmed, note, fetchedTitle) : null
@@ -158,6 +162,19 @@ export function TonightPicker({
                 )}
               </p>
             </div>
+          )}
+
+          {!editing && (
+            <label className="flex items-center gap-2">
+              <span className="text-[0.8125rem] text-dim">어느 밤</span>
+              <input
+                type="date"
+                value={date}
+                max={todayKey()}
+                onChange={(e) => setDate(e.target.value || todayKey())}
+                className="tnum rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-base text-ink"
+              />
+            </label>
           )}
 
           <input
@@ -229,7 +246,7 @@ export function TonightPicker({
                   <button
                     type="button"
                     onClick={() => {
-                      onSelect(item.id)
+                      onSelect(item.id, date)
                       onClose()
                     }}
                     className={`flex min-w-0 flex-1 items-center gap-3 rounded-lg border p-2 text-left transition-colors ${
